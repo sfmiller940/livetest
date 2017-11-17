@@ -1,0 +1,20 @@
+{
+  "name": "livetest",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node index"
+  },
+  "dependencies": {
+    "poloniex": "*",
+    "express": "*",
+    "request": "*",
+    "path": "*",
+    "body-parser": "*",
+    "infinite-loop": "*",
+    "mongoose": "*",
+    "vue": "*",
+    "webpack": "*",
+    "webpack-sass": "*"
+  }
+}
