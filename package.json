@@ -6,7 +6,7 @@
     "start": "node index"
   },
   "dependencies": {
-    "poloniex": "*",
+    "poloniex.js": "*",
     "express": "*",
     "request": "*",
     "path": "*",

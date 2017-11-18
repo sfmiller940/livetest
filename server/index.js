@@ -2,9 +2,8 @@
 const express      = require('express'),
       app          = express(),
       path         = require('path'),
-      bodyParser   = require('body-parser'),
-      Poloniex     = require('poloniex');
-
+      bodyParser   = require('body-parser');
+      
 var runServer = function(models){
 
   app

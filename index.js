@@ -2,5 +2,5 @@
 const models   = require('./models'),
       server = require('./server');
 
-models.runBots();
+models.loopBots();
 server(models);
