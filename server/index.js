@@ -3,7 +3,7 @@ const express      = require('express'),
       app          = express(),
       path         = require('path'),
       bodyParser   = require('body-parser');
-      
+
 var runServer = function(models){
 
   app
@@ -12,6 +12,7 @@ var runServer = function(models){
 
     .use([
       bodyParser.json(),
+      bodyParser.urlencoded({extended: true }),
       express.static(path.join(__dirname, 'public')),
     ])
 
@@ -35,6 +36,27 @@ var runServer = function(models){
           res.json(docs);
         }
       );
+    })
+
+    .post('/bots',function(req,res){
+      console.log( req.body.pair );
+      var bot = new models['bots']({
+        pair:req.body.pair,
+        signal:req.body.signal,
+        params:{},//JSON.parse(req.body.params),
+        base:req.body.base,
+        quote:req.body.quote,
+        active: ( req.body.active ? true : false )
+      });
+      bot.save(function(err,message){
+        if(err){
+          console.log('Error saving bot: '+err);
+          res.redirect('/?botCreated=False');
+        }
+        else{
+          res.redirect('/?botCreated=True');
+        }
+      });
     })
 
     .get('/trades', function(req, res){

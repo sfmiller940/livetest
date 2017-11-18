@@ -13,7 +13,7 @@ mongoose.connect('localhost:27017/livetest');
 
 var logSchema = new Schema({
   message:        String,
-  created_at:     Date
+  created_at:     { type: Date, default: Date.now }
 });
 
 var botSchema = new Schema({
@@ -23,7 +23,7 @@ var botSchema = new Schema({
   base:        Number,
   quote:       Number,
   active:      Boolean,
-  created_at:  Date
+  created_at:  { type: Date, default: Date.now }
 });
 
 var tradeSchema = new Schema({
@@ -32,7 +32,7 @@ var tradeSchema = new Schema({
   buy:         Boolean,
   quote:       Number,
   price:       Number,
-  created_at:  Date
+  created_at:  { type: Date, default: Date.now }
 });
 
 var blade = function(bot){
@@ -43,7 +43,7 @@ var signals = [blade];
 
 var log = function(message){
   console.log(message);
-  /*var log = new models['log']({message:message});
+  /*var log = new models['logs']({message:message});
   log.save(function(err,message){
     if(err) console.log('Log save error: '+err);
   });*/
@@ -64,6 +64,7 @@ var runBots = function(){
 }
 
 botSchema.methods.run = function(){
+  if( ! this.active ) return;
   return poloniex.returnTicker(function(err,data){
     if(err){ log('Unable to get ticker: ' + err); }
     else{
@@ -100,4 +101,3 @@ var models = {
 };
 
 module.exports = models;
-
