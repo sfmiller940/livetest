@@ -29,34 +29,58 @@ var runServer = function(models){
 
     .get('/bots', function(req, res){
       models.bots.find({})
-        .sort('created_at')
+        .sort('-created_at')
         .batchSize(100000)
-        .exec(function (err, docs) {
+        .exec(function (err, bots) {
           if(err) console.log(err);
-          res.json(docs);
+          res.json(bots);
         }
       );
     })
 
     .post('/bots',function(req,res){
-      console.log( req.body.pair );
       var bot = new models['bots']({
         pair:req.body.pair,
         signal:req.body.signal,
-        params:{},//JSON.parse(req.body.params),
+        params:req.body.params,
         base:req.body.base,
         quote:req.body.quote,
-        active: ( req.body.active ? true : false )
+        active: ( req.body.active ? true : false)
       });
       bot.save(function(err,message){
         if(err){
           console.log('Error saving bot: '+err);
-          res.redirect('/?botCreated=False');
+          res.redirect('/?botCreated=false');
         }
         else{
-          res.redirect('/?botCreated=True');
+          res.redirect('/?botCreated=true');
         }
       });
+    })
+
+    .post('/bots/delete/:botid',function(req,res){
+      models.bots.findById(req.params.botid).remove(function(err,message){
+        if(err) res.redirect('/?botDeleted=false');
+        else res.redirect('/?botDeleted=true');
+      });
+    })
+
+    .post('/bots/update/:botid',function(req,res){
+      models.bots.update(
+        {_id:req.params.botid},
+        {$set:{ 
+          pair:req.body.pair,
+          signal:req.body.signal,
+          params:req.body.params,
+          base:req.body.base,
+          quote:req.body.quote,
+          active: ( req.body.active ? true : false)
+        }},
+        function(err){
+          if(err) res.send(err.message);
+          else res.send('true');
+        }
+      );
     })
 
     .get('/trades', function(req, res){

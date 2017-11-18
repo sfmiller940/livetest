@@ -19,7 +19,7 @@ var logSchema = new Schema({
 var botSchema = new Schema({
   pair:        String,
   signal:      String,
-  params:      Object,
+  params:      String,
   base:        Number,
   quote:       Number,
   active:      Boolean,
@@ -35,11 +35,7 @@ var tradeSchema = new Schema({
   created_at:  { type: Date, default: Date.now }
 });
 
-var blade = function(bot){
-
-};
-
-var signals = [blade];
+var signals = {'blade':function(bot){}};
 
 var log = function(message){
   console.log(message);
