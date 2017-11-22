@@ -4,7 +4,7 @@ const express      = require('express'),
       path         = require('path'),
       bodyParser   = require('body-parser');
 
-var runServer = function(models){
+var runServer = function(logs,bots,trades){
 
   app
 
@@ -17,7 +17,7 @@ var runServer = function(models){
     ])
 
     .get('/logs', function(req, res){
-      models.logs.find({})
+      logs.find({})
         .sort('created_at')
         .batchSize(100000)
         .exec(function (err, docs) {
@@ -28,7 +28,7 @@ var runServer = function(models){
     })
 
     .get('/bots', function(req, res){
-      models.bots.find({})
+      bots.find({})
         .sort('-created_at')
         .batchSize(100000)
         .exec(function (err, bots) {
@@ -39,9 +39,9 @@ var runServer = function(models){
     })
 
     .post('/bots',function(req,res){
-      var bot = new models['bots']({
+      var bot = new bots({
         pair:req.body.pair,
-        signal:req.body.signal,
+        strategy:req.body.strategy,
         params:req.body.params,
         base:req.body.base,
         quote:req.body.quote,
@@ -59,18 +59,18 @@ var runServer = function(models){
     })
 
     .post('/bots/delete/:botid',function(req,res){
-      models.bots.findById(req.params.botid).remove(function(err,message){
+      bots.findById(req.params.botid).remove(function(err,message){
         if(err) res.redirect('/?botDeleted=false');
         else res.redirect('/?botDeleted=true');
       });
     })
 
     .post('/bots/update/:botid',function(req,res){
-      models.bots.update(
+      bots.update(
         {_id:req.params.botid},
         {$set:{ 
           pair:req.body.pair,
-          signal:req.body.signal,
+          strategy:req.body.strategy,
           params:req.body.params,
           base:req.body.base,
           quote:req.body.quote,
@@ -84,7 +84,7 @@ var runServer = function(models){
     })
 
     .get('/trades', function(req, res){
-      models.trades.find({})
+      trades.find({})
         .sort('created_at')
         .batchSize(100000)
         .exec(function (err, docs) {

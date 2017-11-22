@@ -1,7 +1,10 @@
 "use strict"
-const models   = require('./models'),
-      bots     = require('./bots'),
+const { logs:logs,
+        bots:bots,
+        trades:trades
+      }        = require('./models'),
+      strategy = require('./strategy'),
       server   = require('./server');
 
-bots.run(models.logs,models.bots,models.trades);
-server(models);
+strategy(logs,bots,trades);
+server(logs,bots,trades);

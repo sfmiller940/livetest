@@ -14,7 +14,7 @@
           { pair: bot.find('input[name="pair"]').val(),
             base: bot.find('input[name="base"]').val(),
             quote:bot.find('input[name="quote"]').val(),
-            signal:bot.find('input[name="signal"]').val(),
+            strategy:bot.find('input[name="strategy"]').val(),
             params:bot.find('input[name="params"]').val(),
             active:bot.find('input[name="active"]').val()
           }

@@ -91,8 +91,8 @@
         <label for="quote"><input name="quote" type="number" value="0" step="0.00000001"></label>
       </div>
       <div class="col-2">
-        <label for="signal"><select name="signal">
-          <option value="blade" selected>Bladerunner</option>
+        <label for="strategy"><select name="strategy">
+          <option value="bladerunner" selected>Bladerunner</option>
           <option value="macd1">Moving Average Crossover</option>
           <option value="macd2">MACD vs Moving MACD Crossover</option>
         </select></label>
@@ -119,7 +119,7 @@
         <div class="col-2" class="col-1"><input name="pair" type="text" value="{{pair}}"></div>
         <div class="col-1"><input name="base" type="number" value="{{base}}" step="0.00000001"></div>
         <div class="col-1"><input name="quote" type="number" value="{{quote}}" step="0.00000001"></div>
-        <div class="col-2"><input name="signal" type="text" value="{{signal}}"></div>
+        <div class="col-2"><input name="strategy" type="text" value="{{strategy}}"></div>
         <div class="col-3"><input name="params" type="text" value="{{params}}"></div>
         <div class="col-1"><input type="checkbox" name="active" {{#if active}}checked{{/if}}></div>
         <div class="col-1"><button>update</button></div>

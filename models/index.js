@@ -10,13 +10,20 @@ var logSchema = new Schema({
   created_at:     { type: Date, default: Date.now }
 });
 
+logSchema.statics.log = function(message) {
+  console.log(message);
+  this.create({message:message},function(err,message){
+    if(err) console.log('Log save error: '+err);
+  });
+}
+
 var botSchema = new Schema({
   pair:        String,
   base:        Number,
   quote:       Number,
-  signal:      String,
+  strategy:    String,
   params:      String,
-  buy:         { type: Boolean, default:false},
+  signal:      { type: Number, default:false},
   active:      { type: Boolean, default:false},
   created_at:  { type: Date, default: Date.now }
 });
