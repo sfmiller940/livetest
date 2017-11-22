@@ -8,6 +8,16 @@ var strategy = function(logs,bots,trades){
 
   var liveBots = [];
 
+  function vwap(data){
+    var total = 0,
+        volume = 0;
+    for(var i=0;i<data.length;i++){
+      total += data[i].weightedAverage * data[i].volume;
+      volume += data[i].volume;
+    }
+    return total / volume;
+  }
+
   var newTicker = function(ticker){
     bots
       .find({strategy:'bladerunner',active:true})
@@ -16,11 +26,12 @@ var strategy = function(logs,bots,trades){
 
         bots.forEach(function(bot){
           if( liveBots.indexOf(bot) != -1 ) return;
+          if( ticker.currencyPair != bot.pair) return;
           liveBots.push(bot);
 
           var now =  Math.floor( (new Date()).getTime() / 1000 );
           var params = JSON.parse( bot.params );
-          return poloniex.returnChartData(
+          poloniex.returnChartData(
             bot.pair,
             params.period,
             now - (params.length*params.period),
@@ -28,10 +39,27 @@ var strategy = function(logs,bots,trades){
             function(err,chart){
               if(err){ logs.log('Unable to get chart data: ' + err); }
               else{
-                console.log(ticker);
+                //console.log(ticker.currencyPair);
                 //console.log(chart);
+                //console.log(vwap(chart));
+
+                if(ticker.last < vwap(chart) ){
+                  if(0 < bot.quote){
+                    bot.base += bot.quote * ticker.last;
+                    bot.quote = 0;
+                    bot.save(function(err,message){
+                      if(err) logs.log('Error updating bot: '+err);
+                    });
+                  }
+                }
+                else if( 0 < bot.base){
+                  bot.quote += bot.base / ticker.last;
+                  bot.base = 0;
+                  bot.save(function(err,message){
+                    if(err) logs.log('Error updating bot: '+err);
+                  });
+                }
                 liveBots.splice(liveBots.indexOf(bot),1);
-                return;
               }
             }
           );
