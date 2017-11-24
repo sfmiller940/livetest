@@ -6,9 +6,7 @@ let poloniex = new Poloniex();
 
 var strategy = function(logs,bots,trades){
 
-  var liveBots = [];
-
-  function vwap(data){
+  var vwap = function(data){
     var total = 0,
         volume = 0;
     for(var i=0;i<data.length;i++){
@@ -16,67 +14,124 @@ var strategy = function(logs,bots,trades){
       volume += data[i].volume;
     }
     return total / volume;
-  }
+  };
 
-  var newTicker = function(ticker){
+  var getChart = function(pair,period,length,end){
+    return poloniex.returnChartData(
+      pair,
+      period,
+      end - (length*period),
+      end
+    )
+    .then((chart)=>{ return chart; })
+    .catch((err)=>{
+      console.log('Failed to load chart: '+err);
+      return false;
+    });
+  };
+
+  var liveBots = [];
+  var processTicker = function(ticker){
     bots
-      .find({strategy:'bladerunner',active:true})
-      .exec(function (err, bots) {
-        if(err) logs.log("Error loading bots: "+err);
+      .find({
+        active: true,
+        pair: ticker.currencyPair,
+        strategy: 'bladerunner'
+      })
+      .exec()
+      .then((bots)=>{
 
-        bots.forEach(function(bot){
-          if( liveBots.indexOf(bot) != -1 ) return;
-          if( ticker.currencyPair != bot.pair) return;
-          liveBots.push(bot);
+        return Promise.all( 
+          bots.map((bot)=>{
 
-          var now =  Math.floor( (new Date()).getTime() / 1000 );
-          var params = JSON.parse( bot.params );
-          poloniex.returnChartData(
-            bot.pair,
-            params.period,
-            now - (params.length*params.period),
-            now,
-            function(err,chart){
-              if(err){ logs.log('Unable to get chart data: ' + err); }
-              else{
-                //console.log(ticker.currencyPair);
-                //console.log(chart);
-                //console.log(vwap(chart));
-
-                if(ticker.last < vwap(chart) ){
-                  if(0 < bot.quote){
-                    bot.base += bot.quote * ticker.last;
-                    bot.quote = 0;
-                    bot.save(function(err,message){
-                      if(err) logs.log('Error updating bot: '+err);
-                    });
-                  }
-                }
-                else if( 0 < bot.base){
-                  bot.quote += bot.base / ticker.last;
-                  bot.base = 0;
-                  bot.save(function(err,message){
-                    if(err) logs.log('Error updating bot: '+err);
-                  });
-                }
-                liveBots.splice(liveBots.indexOf(bot),1);
-              }
+            if( liveBots.indexOf(bot) != -1 ){
+              console.log('live bot!');
+              return;
             }
-          );
-        });
+            liveBots.push(bot);
+
+            var now =  Math.floor( (new Date()).getTime() / 1000 );
+            var params = JSON.parse( bot.params );
+            return getChart(
+              bot.pair,
+              params.period,
+              params.length,
+              now
+            )
+            .then((chart)=>{
+                var ave = vwap(chart);
+                if(ticker.lowestAsk < ave && 0 != bot.quote ){
+                  bot.base += bot.quote * ticker.highestBid;
+                  bot.quote = 0;
+                  return bot
+                    .save()
+                    .then((bot) => { 
+                      return trades.log({
+                          bot:bot,
+                          pair:bot.pair,
+                          base:bot.base,
+                          quote:0,
+                          price: ticker.highestBid
+                        })
+                        .then((trade)=>{
+                          liveBots.splice(liveBots.indexOf(bot),1);
+                          return;
+                        })
+                        .catch((err)=>{ console.log('Error saving trade: '+err) });
+                    })
+                    .catch(()=>{ console.log('Error saving bot: '+err) });
+                }
+                else if( ave < ticker.highestBid && 0 != bot.base ){
+                  bot.quote += bot.base / ticker.lowestAsk;
+                  bot.base = 0;
+                  return bot
+                    .save()
+                    .then((bot) => { 
+                      return trades.log({
+                          bot:bot,
+                          pair:bot.pair,
+                          base:0,
+                          quote:bot.quote,
+                          price: ticker.lowestAsk
+                        })
+                        .then((trade)=>{
+                          liveBots.splice(liveBots.indexOf(bot),1);
+                          return;
+                        })
+                        .catch((err)=>{ console.log('Error saving trade: '+err) });
+                    })
+                    .catch(()=>{ console.log('Error saving bot: '+err) });
+                }
+                else{
+                  liveBots.splice(liveBots.indexOf(bot),1);
+                  return;
+                }
+              }
+            )
+            .catch((err)=>{
+              liveBots.splice(liveBots.indexOf(bot),1);
+              console.log('Failed to load chart: '+err);
+              return;
+            });
+          })
+        );
       }
-    );
+    )
+    .catch((err)=>{
+      console.log('Error getting bots: '+err);
+    });
   };
 
   poloniex.subscribe('ticker');
   poloniex.subscribe('BTC_ETH');
   poloniex.on('open', () => { console.log(`Poloniex WebSocket connection open`); });
-  poloniex.on('close', (reason, details) => { console.log(`Poloniex WebSocket connection disconnected`); });
-  poloniex.on('error', (err) => { logs.log(`Websockets error: ` + err); ;})
+  poloniex.on('close', (reason, details) => { logs.log(`Poloniex WebSocket connection disconnected`); });
+  poloniex.on('error', (err) => { logs.log(`Websockets error: ` + err);})
   
   poloniex.on('message', (channel, data, seq) => {
+
     if (channel === 'ticker') {
-      newTicker(data);
+      processTicker( data );
     }
 
     if (channel === 'BTC_ETC') {
@@ -85,7 +140,7 @@ var strategy = function(logs,bots,trades){
     }
   });
   
-  poloniex.openWebSocket();
+  poloniex.openWebSocket({version:2});
 }
 
 module.exports = strategy;
