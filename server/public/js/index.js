@@ -7,16 +7,19 @@
       document.getElementById('bots').innerHTML = template({'bots':bots});
 
       $('.row.bot button').click(function(){
-        var bot = $(this).closest('.bot');
+        var botDiv = $(this).closest('.bot');
 
         $.post(
-          "/bots/update/" + bot.attr('id'),
-          { pair: bot.find('input[name="pair"]').val(),
-            base: bot.find('input[name="base"]').val(),
-            quote:bot.find('input[name="quote"]').val(),
-            strategy:bot.find('input[name="strategy"]').val(),
-            params:bot.find('input[name="params"]').val(),
-            active:bot.find('input[name="active"]').val()
+          "/bots/update/" + botDiv.attr('id'),
+          { exchange: botDiv.find('input[name="exchange"]').val(),
+            pair: botDiv.find('input[name="pair"]').val(),
+            base: botDiv.find('input[name="base"]').val(),
+            baseAmt: botDiv.find('input[name="baseAmt"]').val(),
+            quote:botDiv.find('input[name="quote"]').val(),
+            quoteAmt:botDiv.find('input[name="quoteAmt"]').val(),
+            signal:botDiv.find('input[name="signal"]').val(),
+            params:botDiv.find('input[name="params"]').val(),
+            active:botDiv.find('input[name="active"]').val()
           }
         )
         .done(function( data ) {

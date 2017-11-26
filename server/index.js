@@ -41,10 +41,13 @@ var runServer = function(logs,bots,trades){
     .post('/bots',(req,res)=>{
       bots.create({
         pair:req.body.pair,
-        strategy:req.body.strategy,
+        signal:req.body.signal,
         params:req.body.params,
+        exchange:req.body.exchange,
         base:req.body.base,
+        baseAmt:req.body.baseAmt,
         quote:req.body.quote,
+        quoteAmt:req.body.quoteAmt,
         active: ( req.body.active ? true : false)
       },
       (err,bot)=>{
@@ -70,7 +73,7 @@ var runServer = function(logs,bots,trades){
         {_id:req.params.botid},
         {$set:{ 
           pair:req.body.pair,
-          strategy:req.body.strategy,
+          signal:req.body.signal,
           params:req.body.params,
           base:req.body.base,
           quote:req.body.quote,

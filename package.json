@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "poloniex-api-node": "*",
+    "node-bittrex-api": "*",
     "express": "*",
     "path": "*",
     "body-parser": "*",
