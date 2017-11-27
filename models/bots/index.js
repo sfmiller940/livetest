@@ -76,7 +76,6 @@ botSchema.methods.trade = function(trades){
         .then((bot) => { 
           return trades.log({
             bot:this,
-            pair:this.pair(),
             baseAmt:this.baseAmt,
             quoteAmt:this.quoteAmt,
             price: price

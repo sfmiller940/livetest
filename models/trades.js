@@ -4,7 +4,6 @@ const mongoose       = require('mongoose'),
 
 var tradeSchema = new Schema({
   bot:         [{ type: Schema.Types.ObjectId, ref: 'bots' }],
-  pair:        String,
   baseAmt:     Number,
   quoteAmt:    Number,
   price:       Number,
