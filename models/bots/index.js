@@ -32,7 +32,7 @@ var signals = {
       ])
       .then(([ticker,chart])=>{
         if( (! ticker) || (! chart) ) return false;
-        return indic.vwap(chart) < (ticker.ask/2 + ticker.bid/2);
+        return indic.vwap(chart,params.len) < (ticker.ask/2 + ticker.bid/2);
       })
       .catch((err)=>{ console.log('Bladerunner error: '+err); });
   },
@@ -40,10 +40,21 @@ var signals = {
     return indic
       .getChart(bot.pair(),params.period,params.window2,params.now)
       .then((chart)=>{
-        if( ! chart ) return false;
         return indic.vwap(chart,params.window2) < indic.vwap(chart,params.window1);
       })
-      .catch((err)=>{console.log( 'Macd1 error: '+err );});
+      .catch((err)=>{console.log( 'Macd1 error: '+err);});
+  },
+  'macd2':function(bot,params){
+    return indic
+      .getChart(bot.pair(),params.period,params.window2 + params.len,params.now)
+      .then((chart)=>{
+        var ave=0;
+        for(var i=0;i<params.len;i++){
+          ave += indic.vwap(chart.slice(0,params.window2+i),params.window2) - indic.vwap(chart.slice(0,params.window2+1),params.window1);
+        }
+        return (ave/params.len) < (indic.vwap(chart,params.window2) - indic.vwap(chart,params.window1));
+      })
+      .catch((err)=>{console.log( 'Macd2 error: '+err);});
   }
 }
 

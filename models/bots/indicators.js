@@ -5,9 +5,9 @@ const bittrex  = require('node-bittrex-api'),
 var poloniex = new Poloniex(),
     poloTicker = {};
 poloniex.subscribe('ticker');
-poloniex.on('open', () => { console.log(`Poloniex WebSocket connection open`); });
-poloniex.on('close', (reason, details) => { logs.log(`Poloniex WebSocket connection disconnected`); });
-poloniex.on('error', (err) => { logs.log(`Websockets error: ` + err);})
+poloniex.on('open', () => { console.log('Poloniex websocket connected'); });
+poloniex.on('close', (reason, details) => { console.log('Poloniex websocket disconnected: '+reason); });
+poloniex.on('error', (err) => { console.log('Websockets error: ' + err);})
 poloniex.on('message', (channel, data, seq) => {
   if (channel === 'ticker') {
     poloTicker[data.currencyPair]=data;
@@ -57,7 +57,7 @@ const indicators = {
     return poloniex.returnChartData(
       pair,
       period,
-      end - (len*period),
+      end - ((len+1)*period),
       end
     )
     .catch((err)=>{
