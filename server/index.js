@@ -13,7 +13,7 @@ var runServer = function(logs,bots,trades){
     .use([
       bodyParser.json(),
       bodyParser.urlencoded({extended: true }),
-      express.static(path.join(__dirname, 'public')),
+      express.static(path.join(__dirname, '../app/build')),
     ])
 
     .get('/logs', (req, res)=>{

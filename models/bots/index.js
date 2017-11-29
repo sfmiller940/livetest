@@ -99,21 +99,21 @@ botSchema.methods.run = function(logs,trades){
     });
 };
 
-botSchema.statics.run = function(logs,trades,liveBots){
+botSchema.statics.run = function(logs,trades,runningBots){
   this.find({active:true}).exec()
     .then((bots)=>{
       bots.forEach((bot)=>{
-        if(-1 != liveBots.indexOf(bot)) return;
-        liveBots.push(bot);
+        if(-1 != runningBots.indexOf(bot)) return;3
+        runningBots.push(bot);
         bot.run(logs,trades)
           .then((trade)=>{
-            liveBots.splice(liveBots.indexOf(bot),1);
+            runningBots.splice(runningBots.indexOf(bot),1);
           })
           .catch((err)=>{ console.log('Error running bot: '+err); });
       }); 
     })
     .catch((err)=>{ console.log('Error finding bots: '+err); });
-  console.log('Running bots');
+  console.log( (new Date().toLocaleString()) + ' running bots');
 };
 
 module.exports = botSchema;
