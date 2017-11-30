@@ -9,7 +9,7 @@ server(logs,bots,trades);
 
 var runningBots = [];
 var runBots = function(){
-  bots.run(logs,trades,runningBots);
+  bots.run(trades,runningBots);
   setTimeout(runBots,3000);
 }
 runBots();

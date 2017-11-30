@@ -4,15 +4,15 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');3
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: ['./app/src/index.js','./app/src/scss/index.scss'],
+  entry: ['./app/index.js','./app/scss/index.scss'],
   output: {
-    path: path.resolve(__dirname, './app/build'),
+    path: path.resolve(__dirname, './server/public'),
     publicPath: '/',
     filename: 'index.js'
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: 'app/src/index.html'}),
-    new CopyWebpackPlugin([{from:'app/src/img',to:'img'}])
+    new HtmlWebpackPlugin({ template: 'app/index.html'}),
+    new CopyWebpackPlugin([{from:'app/img',to:'img'}])
   ],
   module: {
     rules: [

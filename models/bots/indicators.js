@@ -1,13 +1,17 @@
 "use strict"
-const bittrex  = require('node-bittrex-api'),
-      Poloniex = require('poloniex-api-node');
+const mongoose       = require('mongoose'),
+      bittrex  = require('node-bittrex-api'),
+      Poloniex = require('poloniex-api-node'),
+      logSchema     = require('../logs');
+
+var logs = mongoose.model('logs', logSchema);
 
 var poloniex = new Poloniex(),
     poloTicker = {};
 poloniex.subscribe('ticker');
-poloniex.on('open', () => { console.log('Poloniex websocket connected'); });
-poloniex.on('close', (reason, details) => { console.log('Poloniex websocket disconnected: '+reason); });
-poloniex.on('error', (err) => { console.log('Websockets error: ' + err);})
+poloniex.on('open', () => { logs.log('Poloniex websocket connected'); });
+poloniex.on('close', (reason, details) => { logs.log('Poloniex websocket disconnected: '+reason); });
+poloniex.on('error', (err) => { logs.log('Websockets error: ' + err);})
 poloniex.on('message', (channel, data, seq) => {
   if (channel === 'ticker') {
     poloTicker[data.currencyPair]=data;
@@ -39,7 +43,7 @@ const indicators = {
             };
           })
           .catch((err)=>{
-            console.log('Bittrex ticker error: '+err);
+            logs.log('Bittrex ticker error: '+err);
             return false;
           });
       break;
@@ -61,7 +65,7 @@ const indicators = {
       end
     )
     .catch((err)=>{
-      console.log('Failed to load chart: '+err);
+      logs.log('Failed to load chart: '+err);
       return false;
     });
   }

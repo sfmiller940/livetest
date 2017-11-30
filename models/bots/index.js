@@ -1,7 +1,10 @@
 "use strict"
 const mongoose       = require('mongoose'),
       Schema         = mongoose.Schema,
-      indic          = require('./indicators');
+      indic          = require('./indicators'),
+      logSchema      = require('../logs');
+
+var logs = mongoose.model('logs', logSchema);
 
 var botSchema = new Schema({
   exchange:    String,
@@ -34,7 +37,7 @@ var signals = {
         if( (! ticker) || (! chart) ) return false;
         return indic.vwap(chart,params.len) < (ticker.ask/2 + ticker.bid/2);
       })
-      .catch((err)=>{ console.log('Bladerunner error: '+err); });
+      .catch((err)=>{ logs.log('Bladerunner error: '+err); });
   },
   'macd1':function(bot,params){
     return indic
@@ -42,7 +45,7 @@ var signals = {
       .then((chart)=>{
         return indic.vwap(chart,params.window2) < indic.vwap(chart,params.window1);
       })
-      .catch((err)=>{console.log( 'Macd1 error: '+err);});
+      .catch((err)=>{logs.log( 'Macd1 error: '+err);});
   },
   'macd2':function(bot,params){
     return indic
@@ -54,7 +57,7 @@ var signals = {
         }
         return (ave/params.len) < (indic.vwap(chart,params.window2) - indic.vwap(chart,params.window1));
       })
-      .catch((err)=>{console.log( 'Macd2 error: '+err);});
+      .catch((err)=>{logs.log( 'Macd2 error: '+err);});
   }
 }
 
@@ -80,14 +83,14 @@ botSchema.methods.trade = function(trades){
             quoteAmt:this.quoteAmt,
             price: price
           })
-          .catch((err)=>{ console.log('Error saving trade: '+err) });
+          .catch((err)=>{ logs.log('Error saving trade: '+err) });
         })
-        .catch((err)=>{ console.log('Error saving bot: '+err) });
+        .catch((err)=>{ logs.log('Error saving bot: '+err) });
     })
-    .catch((err)=>{ console.log('Ticker failure: '+err); });
+    .catch((err)=>{ logs.log('Ticker failure: '+err); });
 };
 
-botSchema.methods.run = function(logs,trades){
+botSchema.methods.run = function(trades){
   var params = JSON.parse(this.params);
   params['now'] = Math.floor( (new Date()).getTime() / 1000 );
   return signals[this.signal](this,params)
@@ -99,20 +102,20 @@ botSchema.methods.run = function(logs,trades){
     });
 };
 
-botSchema.statics.run = function(logs,trades,runningBots){
+botSchema.statics.run = function(trades,runningBots){
   this.find({active:true}).exec()
     .then((bots)=>{
       bots.forEach((bot)=>{
         if(-1 != runningBots.indexOf(bot)) return;3
         runningBots.push(bot);
-        bot.run(logs,trades)
+        bot.run(trades)
           .then((trade)=>{
             runningBots.splice(runningBots.indexOf(bot),1);
           })
-          .catch((err)=>{ console.log('Error running bot: '+err); });
+          .catch((err)=>{ logs.log('Error running bot: '+err); });
       }); 
     })
-    .catch((err)=>{ console.log('Error finding bots: '+err); });
+    .catch((err)=>{ logs.log('Error finding bots: '+err); });
   console.log( (new Date().toLocaleString()) + ' running bots');
 };
 

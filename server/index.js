@@ -13,12 +13,12 @@ var runServer = function(logs,bots,trades){
     .use([
       bodyParser.json(),
       bodyParser.urlencoded({extended: true }),
-      express.static(path.join(__dirname, '../app/build')),
+      express.static(path.join(__dirname, 'public')),
     ])
 
     .get('/logs', (req, res)=>{
       logs.find({})
-        .sort('created_at')
+        .sort('-created_at')
         .batchSize(100000)
         .exec((err, docs)=>{
           if(err) console.log(err);
@@ -88,7 +88,7 @@ var runServer = function(logs,bots,trades){
 
     .get('/trades', (req, res)=>{
       trades.find({})
-        .sort('created_at')
+        .sort('-created_at')
         .batchSize(100000)
         .exec((err, docs)=>{
           if(err) console.log(err);
