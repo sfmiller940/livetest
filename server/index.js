@@ -16,6 +16,14 @@ var runServer = function(logs,bots,trades){
       express.static(path.join(__dirname, 'public')),
     ])
 
+    .get('/logs/clear', (req, res)=>{
+      logs.remove({})
+        .then(()=>{
+          res.json({"response":true});
+        })
+        .catch((err)=>{ console.log('Error clearing logs: '+err); });
+    })
+
     .get('/logs', (req, res)=>{
       logs.find({})
         .sort('-created_at')
@@ -40,14 +48,13 @@ var runServer = function(logs,bots,trades){
 
     .post('/bots',(req,res)=>{
       bots.create({
-        pair:req.body.pair,
-        signal:req.body.signal,
-        params:req.body.params,
         exchange:req.body.exchange,
         base:req.body.base,
         baseAmt:req.body.baseAmt,
         quote:req.body.quote,
         quoteAmt:req.body.quoteAmt,
+        signal:req.body.signal,
+        params:req.body.params,
         active: ( req.body.active ? true : false)
       },
       (err,bot)=>{

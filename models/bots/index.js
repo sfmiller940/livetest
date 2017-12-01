@@ -4,7 +4,15 @@ const mongoose       = require('mongoose'),
       indic          = require('./indicators'),
       logSchema      = require('../logs');
 
-var logs = mongoose.model('logs', logSchema);
+var logs = mongoose.model('logs', logSchema),
+    runningBots = [],
+    polo = false;
+
+indic.poloniex.on('open', () => { polo=true; });
+indic.poloniex.on('close', () => {
+  polo=false;
+  indic.poloniex.openWebSocket({version:2});
+});
 
 var botSchema = new Schema({
   exchange:    String,
@@ -102,7 +110,8 @@ botSchema.methods.run = function(trades){
     });
 };
 
-botSchema.statics.run = function(trades,runningBots){
+botSchema.statics.run = function(trades){
+  if(!polo) return;
   this.find({active:true}).exec()
     .then((bots)=>{
       bots.forEach((bot)=>{

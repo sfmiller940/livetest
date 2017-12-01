@@ -7,9 +7,8 @@ const { logs:logs,
 
 server(logs,bots,trades);
 
-var runningBots = [];
 var runBots = function(){
-  bots.run(trades,runningBots);
+  bots.run(trades);
   setTimeout(runBots,3000);
 }
 runBots();

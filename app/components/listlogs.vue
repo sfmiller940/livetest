@@ -1,14 +1,15 @@
 <template>
   <div id="logs" class="container-fluid">
-    <h2>logs</h2>
+    <h2>logs <button v-on:click="clearLogs()">clear</button></h2>
     <div class="log row" v-for="log in logs">
-      <div class="col-xs-2">{{log.created_at}}</div>
-      <div class="col-xs-10">{{log.message}}</div>
+      <div class="col col-xs-2">{{log.created_at | formatDate}}</div>
+      <div class="col col-xs-10">{{log.message}}</div>
     </div>
   </div>
 </template>
 
 <script>
+const axios = require('axios');
 export default {
   name: 'listlogs',
   data () {
@@ -16,6 +17,14 @@ export default {
       logs: []
     }
   },
-  props:['logs']
+  props:['logs'],
+  methods:{
+    clearLogs:function(){
+      axios.get('/logs/clear').then((response)=>{
+        this.logs=[];
+      })
+      .catch((err)=>{ console.log('Error clearing logs: '+err); });
+    }
+  }
 }
 </script>

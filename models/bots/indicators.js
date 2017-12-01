@@ -21,6 +21,8 @@ poloniex.openWebSocket({version:2});
 
 const indicators = {
 
+  poloniex:poloniex,
+
   vwap: function(df, len = df.length){
     var total  = 0,
         volume = 0;

@@ -18,7 +18,9 @@
 
       <div id="botwatch">
         <listlogs :logs="logs"></listlogs>
-        <createbot></createbot>
+        <createbot
+          v-on:loadbots="loadBots"
+        ></createbot>
         <listbots :bots="bots"></listbots>
         <listtrades :trades="trades"></listlogs>
       </div>

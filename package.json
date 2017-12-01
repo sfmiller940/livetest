@@ -9,6 +9,8 @@
   "dependencies": {
     "axios": "*",
     "bootstrap-grid": "*",
+    "moment": "*",
+    "moment-timezone": "*",
     "vue": "^2.5.8"
   },
   "browserslist": [

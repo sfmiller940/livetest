@@ -2,61 +2,97 @@
   <div id="createbot" class="container-fluid">
     <h2>create</h2>
     <div class="row header">
-      <div class="col-xs-1">Exchange</div>
-      <div class="col-xs-1">Base</div>
-      <div class="col-xs-1">Base Amount</div>
-      <div class="col-xs-1">Quote</div>
-      <div class="col-xs-1">Quote Amount</div>
-      <div class="col-xs-2">Signal</div>
-      <div class="col-xs-2">Params</div>
-      <div class="col-xs-1">Active</div>
-      <div class="col-xs-1"></div>
-      <div class="col-xs-1"></div>
+      <div class="col col-xs-1">Exchange</div>
+      <div class="col col-xs-1">Base Currency</div>
+      <div class="col col-xs-1">Base Amount</div>
+      <div class="col col-xs-1">Quote Currency</div>
+      <div class="col col-xs-1">Quote Amount</div>
+      <div class="col col-xs-2">Signal</div>
+      <div class="col col-xs-3">Params</div>
+      <div class="col col-xs-1 active">Active</div>
     </div>
     <div class="row create">
-      <div class="col-xs-1">
-        <label for="exchange"><select name="exchange">
+      <div class="col col-xs-1">
+        <select v-model="exchange">
           <option value="bittrex">Bittrex</option>
           <option value="poloniex" selected>Poloniex</option>
-        </select></label>
+        </select>
       </div>
-      <div class="col-xs-1">
-        <label for="base"><select name="base">
+      <div class="col col-xs-1">
+        <select v-model="base">
           <option value="BTC">BTC</option>
           <option value="USDT" selected>USDT</option>
-        </select></label>
+        </select>
       </div>
-      <div class="col-xs-1">
-        <label for="baseAmt"><input name ="baseAmt" type="number" value="1" step="0.00000001"></label></label>
+      <div class="col col-xs-1">
+        <input v-model="baseAmt" type="number" value="1" step="0.00000001">
       </div>
-      <div class="col-xs-1">
-        <label for="quote"><input name="quote" type="text" value="BTC"></label>
+      <div class="col col-xs-1">
+        <input v-model="quote" type="text" value="BTC">
       </div>
-      <div class="col-xs-1" class="col-xs-1">
-        <label for="quoteAmt"><input name="quoteAmt" type="number" value="0" step="0.00000001"></label>
+      <div class="col col-xs-1" class="col col-xs-1">
+        <input v-model="quoteAmt" type="number" value="0" step="0.00000001">
       </div>
-      <div class="col-xs-2">
-        <label for="signal"><select name="signal">
+      <div class="col col-xs-2">
+        <select v-model="signal">
           <option value="bladerunner" selected>Bladerunner</option>
           <option value="macd1">Moving Average Crossover</option>
           <option value="macd2">MACD vs Moving MACD Crossover</option>
-        </select></label>
+        </select>
       </div>
-      <div class="col-xs-2">
-        <label for="params"><textarea name="params" rows="4" col-xss="40">
+      <div class="col col-xs-3">
+        <textarea v-model="params" rows="4" col col-xss="40">
   {
   "len":3,
   "period":300
   }
-        </textarea></label>
+        </textarea>
       </div>
-      <div class="col-xs-1">
-        <label for="active"><input name="active" type="checkbox" checked></label>
+      <div class="col col-xs-1 active">
+        <input v-model="active" type="checkbox" checked>
       </div>
-      <div class="col-xs-1">
-        <input type="submit" value="Create">
+      <div class="col col-xs-1">
+        <button v-on:click="createBot()">create</button>
       </div>
-      <div class="col-xs-1"></div>
     </div>
   </div>
 </template>
+
+<script>
+const axios = require('axios');
+export default {
+  name: 'listtrades',
+  data () {
+    return {
+      exchange: 'poloniex',
+      base: 'USDT',
+      baseAmt: 1,
+      quote: 'BTC',
+      quoteAmt: 0,
+      signal: 'bladerunner',
+      params: '{"period":300,"len":4}',
+      active: true
+    }
+  },
+  props:['trades'],
+  methods:{
+    createBot:function(){
+      var self = this;
+      axios.post('/bots', {
+          exchange: this.exchange,
+          base: this.base,
+          baseAmt: this.baseAmt,
+          quote: this.quote,
+          quoteAmt: this.quoteAmt,
+          signal: this.signal,
+          params: this.params,
+          active: this.active
+        })
+        .then(function (response) {
+          self.$emit('loadbots');
+        })
+        .catch((err)=>{ console.log("Error creating bot: "+err); });
+    }
+  }
+}
+</script>
