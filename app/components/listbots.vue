@@ -19,12 +19,19 @@
       <div class="col col-xs-1">{{bot.signal}}</div>
       <div class="col col-xs-3">{{bot.params}}</div>
       <div class="col col-xs-1 active"><input type="checkbox" v-model="bot.active"></div>
-      <div class="col col-xs-1"><button class="delete">delete</button></div>
+      <div class="col col-xs-1"><button class="delete" v-on:click="deleteBot(bot._id)">delete</button></div>
+    </div>
+    <div>
+      <div class="col col-xs-2">Value:</div>
+      <div class="col col-xs-10">{{ bots.reduce(function(total,bot){
+        return total + bot.baseAmt;
+      },0).toFixed(8) }}</div>
     </div>
   </div>
 </template>
 
 <script>
+const axios = require('axios');
 export default {
   name: 'listbots',
   data () {
@@ -32,6 +39,17 @@ export default {
       bots: []
     }
   },
-  props:['bots']
+  props:['bots','ticker'],
+  methods:{
+    deleteBot:function(id){
+      var self=this;
+      axios
+        .get('/bots/delete/'+id)
+        .then((response)=>{
+          self.$emit('loadbots');
+        })
+        .catch((err)=>{console.log('Error deleting bot: '+err)});
+    }
+  }
 }
 </script>

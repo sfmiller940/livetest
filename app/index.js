@@ -8,7 +8,7 @@ const axios = require('axios');
 
 Vue.filter('formatDate', function(value) {
   if (value) {
-    return moment(String(value)).tz('America/Los_Angeles').format('hh:mm MM/DD/YY')
+    return moment(String(value)).tz('America/Los_Angeles').format('HH:mm MM/DD/YY')
   }
 })
 
@@ -23,7 +23,8 @@ var botwatch = new Vue({
   data:{
     'logs':[],
     'bots':[],
-    'trades':[]
+    'trades':[],
+    'ticker':{}
   },
   created:function(){
     this.loadLogs();
@@ -32,22 +33,27 @@ var botwatch = new Vue({
   },      
   methods:{
     loadLogs:function(){
-      axios.get('/logs').then((response)=>{
-        Vue.set( botwatch, 'logs', response.data );
-      })
-      .catch((err)=>{ console.log('Error loading logs: '+err); });
+      axios
+        .get('/logs')
+        .then((response)=>{
+          Vue.set( botwatch, 'logs', response.data );
+        })
+        .catch((err)=>{ console.log('Error loading logs: '+err); });
     },
     loadBots:function(){
-      axios.get('/bots').then((response)=>{
-        Vue.set( botwatch, 'bots', response.data );
-      })
-      .catch((err)=>{ console.log('Error loading bots: '+err); });
+      axios
+        .get('/bots')
+        .then((response)=>{
+          Vue.set( botwatch, 'bots', response.data );
+        })
+        .catch((err)=>{ console.log('Error loading bots: '+err); });
     },    
     loadTrades:function(){
-      axios.get('/trades').then((response)=>{
-        Vue.set( botwatch, 'trades', response.data );
-      })
-      .catch((err)=>{ console.log('Error loading trades: '+err); });
+      axios
+        .get('/trades').then((response)=>{
+          Vue.set( botwatch, 'trades', response.data );
+        })
+        .catch((err)=>{ console.log('Error loading trades: '+err); });
     }
   }
 })

@@ -45,8 +45,7 @@ const indicators = {
             };
           })
           .catch((err)=>{
-            logs.log('Bittrex ticker error: '+err);
-            return false;
+            throw('Bittrex ticker error: '+err);
           });
       break;
       case 'poloniex':
@@ -67,7 +66,7 @@ const indicators = {
       end
     )
     .catch((err)=>{
-      logs.log('Failed to load chart: '+err);
+      throw('Failed to load chart: '+err);
       return false;
     });
   }

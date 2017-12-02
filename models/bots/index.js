@@ -45,7 +45,7 @@ var signals = {
         if( (! ticker) || (! chart) ) return false;
         return indic.vwap(chart,params.len) < (ticker.ask/2 + ticker.bid/2);
       })
-      .catch((err)=>{ logs.log('Bladerunner error: '+err); });
+      .catch((err)=>{ throw('Bladerunner error: '+err); });
   },
   'macd1':function(bot,params){
     return indic
@@ -53,7 +53,7 @@ var signals = {
       .then((chart)=>{
         return indic.vwap(chart,params.window2) < indic.vwap(chart,params.window1);
       })
-      .catch((err)=>{logs.log( 'Macd1 error: '+err);});
+      .catch((err)=>{throw( 'Macd1 error: '+err);});
   },
   'macd2':function(bot,params){
     return indic
@@ -65,7 +65,7 @@ var signals = {
         }
         return (ave/params.len) < (indic.vwap(chart,params.window2) - indic.vwap(chart,params.window1));
       })
-      .catch((err)=>{logs.log( 'Macd2 error: '+err);});
+      .catch((err)=>{throw( 'Macd2 error: '+err);});
   }
 }
 
@@ -91,11 +91,11 @@ botSchema.methods.trade = function(trades){
             quoteAmt:this.quoteAmt,
             price: price
           })
-          .catch((err)=>{ logs.log('Error saving trade: '+err) });
+          .catch((err)=>{ throw('Error saving trade: '+err) });
         })
-        .catch((err)=>{ logs.log('Error saving bot: '+err) });
+        .catch((err)=>{ throw('Error saving bot: '+err) });
     })
-    .catch((err)=>{ logs.log('Ticker failure: '+err); });
+    .catch((err)=>{ throw('Ticker failure: '+err); });
 };
 
 botSchema.methods.run = function(trades){

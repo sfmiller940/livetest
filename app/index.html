@@ -21,7 +21,11 @@
         <createbot
           v-on:loadbots="loadBots"
         ></createbot>
-        <listbots :bots="bots"></listbots>
+        <listbots 
+          :bots="bots"
+          :ticker="ticker"
+          v-on:loadbots="loadBots"
+        ></listbots>
         <listtrades :trades="trades"></listlogs>
       </div>
     

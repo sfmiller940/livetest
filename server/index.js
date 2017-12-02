@@ -35,6 +35,13 @@ var runServer = function(logs,bots,trades){
       );
     })
 
+    .get('/bots/delete/:botid',(req,res)=>{
+      bots.findById(req.params.botid).remove((err,message)=>{
+        if(err) res.redirect('/?botDeleted=false');
+        else res.redirect('/?botDeleted=true');
+      });
+    })
+
     .get('/bots', (req, res)=>{
       bots.find({})
         .sort('-created_at')
@@ -65,13 +72,6 @@ var runServer = function(logs,bots,trades){
         else{
           res.redirect('/?botCreated=true');
         }
-      });
-    })
-
-    .post('/bots/delete/:botid',(req,res)=>{
-      bots.findById(req.params.botid).remove((err,message)=>{
-        if(err) res.redirect('/?botDeleted=false');
-        else res.redirect('/?botDeleted=true');
       });
     })
 
