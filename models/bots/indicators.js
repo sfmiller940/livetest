@@ -53,9 +53,10 @@ const indicators = {
           'bid': poloTicker[pair].highestBid,
           'ask': poloTicker[pair].lowestAsk
         });
+        else throw('Ticker not loaded');
       break;
     }
-    return Promise.resolve(false);
+    throw('Ticker error: invalid exchange');
   },
 
   getChart: function(pair,period,len,end){
@@ -67,7 +68,6 @@ const indicators = {
     )
     .catch((err)=>{
       throw('Failed to load chart: '+err);
-      return false;
     });
   }
 };

@@ -22,8 +22,9 @@
       <div class="col col-xs-1"><button class="delete" v-on:click="deleteBot(bot._id)">delete</button></div>
     </div>
     <div>
-      <div class="col col-xs-2">Value:</div>
-      <div class="col col-xs-10">{{ bots.reduce(function(total,bot){
+      <div class="col col-xs-2"></div>
+      <div class="col col-xs-1">Value:</div>
+      <div class="col col-xs-9">{{ bots.reduce(function(total,bot){
         return total + bot.baseAmt;
       },0).toFixed(8) }}</div>
     </div>
