@@ -39,7 +39,7 @@ var signals = {
     return Promise
       .all([
         indic.getTicker(bot.exchange,bot.pair()),
-        indic.getChart(bot.pair(),params.period,params.len,params.now)
+        indic.getChart(bot.pair(),params.period,params.len)
       ])
       .then(([ticker,chart])=>{
         if( (! ticker) || (! chart) ) return false;
@@ -49,7 +49,7 @@ var signals = {
   },
   'macd1':function(bot,params){
     return indic
-      .getChart(bot.pair(),params.period,params.window2,params.now)
+      .getChart(bot.pair(),params.period,params.window2)
       .then((chart)=>{
         return indic.vwap(chart,params.window2) < indic.vwap(chart,params.window1);
       })
@@ -57,7 +57,7 @@ var signals = {
   },
   'macd2':function(bot,params){
     return indic
-      .getChart(bot.pair(),params.period,params.window2 + params.len,params.now)
+      .getChart(bot.pair(),params.period,params.window2 + params.len)
       .then((chart)=>{
         var ave=0;
         for(var i=0;i<params.len;i++){
@@ -100,7 +100,6 @@ botSchema.methods.trade = function(trades){
 
 botSchema.methods.run = function(trades){
   var params = JSON.parse(this.params);
-  params['now'] = Math.floor( (new Date()).getTime() / 1000 );
   return signals[this.signal](this,params)
     .then((signal)=>{
       if(  ( signal && 0 != this.baseAmt )

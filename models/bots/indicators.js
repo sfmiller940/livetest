@@ -1,13 +1,13 @@
 "use strict"
-const mongoose       = require('mongoose'),
-      bittrex  = require('node-bittrex-api'),
-      Poloniex = require('poloniex-api-node'),
-      logSchema     = require('../logs');
-
-var logs = mongoose.model('logs', logSchema);
+const mongoose  = require('mongoose'),
+      bittrex   = require('node-bittrex-api'),
+      Poloniex  = require('poloniex-api-node'),
+      logSchema = require('../logs'),
+      logs      = mongoose.model('logs', logSchema);
 
 var poloniex = new Poloniex(),
-    poloTicker = {};
+    poloTicker = {},
+    charts = {};
 poloniex.subscribe('ticker');
 poloniex.on('open', () => { logs.log('Poloniex websocket connected'); });
 poloniex.on('close', (reason, details) => { logs.log('Poloniex websocket disconnected: '+reason); });
@@ -18,6 +18,7 @@ poloniex.on('message', (channel, data, seq) => {
   }
 });
 poloniex.openWebSocket({version:2});
+
 
 const indicators = {
 
@@ -59,13 +60,26 @@ const indicators = {
     throw('Ticker error: invalid exchange');
   },
 
-  getChart: function(pair,period,len,end){
+  getChart: function(pair,period,len){
+    var now = Math.floor( (new Date()).getTime() / 1000 );
+    if(
+      pair in charts
+      && period in charts[pair]
+      && len <= charts[pair][period].length 
+      && (new Date( charts[pair][period].slice(-1)[0].date ).getTime() / 1000 ) < (now - period)
+    ) return Promise.resolve(charts[pair][period].slice(-len));
+
     return poloniex.returnChartData(
       pair,
       period,
-      end - ((len+1)*period),
-      end
+      now - ((len+1)*period),
+      now
     )
+    .then((chart)=>{
+      if(!(pair in charts)) charts[pair]={};
+      charts[pair][period] = chart;
+      return chart;
+    })
     .catch((err)=>{
       throw('Failed to load chart: '+err);
     });
