@@ -42,6 +42,17 @@
         </select>
       </div>
       <div class="col col-xs-3">
+        <select>
+          <option value="300">5 mins</option>
+          <option value="900">15 mins</option>
+          <option value="1800">30 mins</option>
+          <option value="7200">2 hours</option>
+          <option value="14400">4 hours</option>
+          <option value="86400">1 day</option>
+        </select>
+        <label v-if="signal!='bladerunner'"><input type="number" placeholder="window1" step="1" min="2"></label>
+        <label v-if="signal!='bladerunner'"><input type="number" placeholder="window2" step="1" min="2"></label>
+        <label v-if="signal!='macd1'"><input type="number" placeholder="length" step="1" min="2"></label>
         <textarea v-model="params" rows="4" col col-xss="40">
   {
   "len":3,

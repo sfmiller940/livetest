@@ -21,12 +21,12 @@
       <div class="col col-xs-1 active"><input type="checkbox" v-model="bot.active"></div>
       <div class="col col-xs-1"><button class="delete" v-on:click="deleteBot(bot._id)">delete</button></div>
     </div>
-    <div>
-      <div class="col col-xs-4">{{bots.length}} Bots</div>
-      <div class="col col-xs-1">Total value:</div>
-      <div class="col col-xs-7">{{ bots.reduce(function(total,bot){
+    <div class="totals row">
+      <div class="col col-xs-4"><strong>{{bots.length}} Bots</strong></div>
+      <div class="col col-xs-1"><strong>Total value:</strong></div>
+      <div class="col col-xs-7"><strong>{{ bots.reduce(function(total,bot){
         return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
-      },0).toFixed(8) }}</div>
+      },0).toFixed(8) }}</strong></div>
     </div>
   </div>
 </template>
