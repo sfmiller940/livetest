@@ -14,13 +14,14 @@
     <div class="row create">
       <div class="col col-xs-1">
         <select v-model="exchange">
-          <option value="bittrex">Bittrex</option>
           <option value="poloniex" selected>Poloniex</option>
         </select>
       </div>
       <div class="col col-xs-1">
         <select v-model="base">
           <option value="BTC">BTC</option>
+          <option value="ETH">ETH</option>
+          <option value="XMR">XMR</option>
           <option value="USDT" selected>USDT</option>
         </select>
       </div>
