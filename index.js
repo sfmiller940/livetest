@@ -2,13 +2,16 @@
 const { logs:logs,
         bots:bots,
         trades:trades
-      }        = require('./models'),
-      server   = require('./server');
+      }        = require('./models');
 
-server(logs,bots,trades);
-
-var runBots = function(){
-  bots.run(trades);
-  setTimeout(runBots,5000);
+if (process.env.NODE_ENV === 'server') {
+  const server   = require('./server');
+  server(logs,bots,trades);
 }
-runBots();
+else{
+  var runBots = function(){
+    bots.run(trades);
+    setTimeout(runBots,5000);
+  }
+  runBots();
+}

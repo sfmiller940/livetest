@@ -54,24 +54,25 @@ var runServer = function(logs,bots,trades){
     })
 
     .post('/bots',(req,res)=>{
-      bots.create({
-        exchange:req.body.exchange,
-        base:req.body.base,
-        baseAmt:req.body.baseAmt,
-        quote:req.body.quote,
-        quoteAmt:req.body.quoteAmt,
-        signal:req.body.signal,
-        params:req.body.params,
-        active: ( req.body.active ? true : false)
-      },
-      (err,bot)=>{
-        if(err){
-          console.log('Error saving bot: '+err);
-          res.redirect('/?botCreated=false');
-        }
-        else{
-          res.redirect('/?botCreated=true');
-        }
+      Promise.all(
+        req.body.quotes.map((quote)=>{
+          return bots.create({
+            exchange:req.body.exchange,
+            base:req.body.base,
+            baseAmt:req.body.baseAmt,
+            quote:quote,
+            quoteAmt:req.body.quoteAmt,
+            params:req.body.params,
+            active:req.body.active
+          });
+        })
+      )
+      .then((results)=>{
+        res.redirect('/?botCreated=true');
+      })
+      .catch((err)=>{
+        console.log('Error saving bot: '+err);
+        res.redirect('/?botCreated=false');
       });
     })
 

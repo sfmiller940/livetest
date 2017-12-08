@@ -20,8 +20,7 @@ var botSchema = new Schema({
   baseAmt:     Number,
   quote:       String,
   quoteAmt:    Number,
-  signal:      String,
-  params:      String,
+  params:      Object,
   active:      { type: Boolean, default:false},
   created_at:  { type: Date, default: Date.now }
 });
@@ -35,35 +34,35 @@ botSchema.methods.pair = function(){
 };
 
 var signals = {
-  'bladerunner':function(bot,params){
+  'bladerunner':function(bot){
     return Promise
       .all([
         indic.getTicker(bot.exchange,bot.pair()),
-        indic.getChart(bot.pair(),params.period,params.len)
+        indic.getChart(bot.pair(),bot.params.period,bot.params.len)
       ])
       .then(([ticker,chart])=>{
         if( (! ticker) || (! chart) ) return false;
-        return indic.vwap(chart,params.len) < (ticker.ask/2 + ticker.bid/2);
+        return indic.vwap(chart,bot.params.len) < (ticker.ask/2 + ticker.bid/2);
       })
       .catch((err)=>{ throw('Bladerunner error: '+err); });
   },
-  'macd1':function(bot,params){
+  'macd1':function(bot){
     return indic
-      .getChart(bot.pair(),params.period,params.window2)
+      .getChart(bot.pair(),bot.params.period,bot.params.window2)
       .then((chart)=>{
-        return indic.vwap(chart,params.window2) < indic.vwap(chart,params.window1);
+        return indic.vwap(chart,bot.params.window2) < indic.vwap(chart,bot.params.window1);
       })
       .catch((err)=>{throw( 'Macd1 error: '+err);});
   },
-  'macd2':function(bot,params){
+  'macd2':function(bot){
     return indic
-      .getChart(bot.pair(),params.period,params.window2 + params.len)
+      .getChart(bot.pair(),bot.params.period,bot.params.window2 + bot.params.len)
       .then((chart)=>{
         var ave=0;
-        for(var i=0;i<params.len;i++){
-          ave += indic.vwap(chart.slice(0,params.window2+i),params.window2) - indic.vwap(chart.slice(0,params.window2+1),params.window1);
+        for(var i=0;i<bot.params.len;i++){
+          ave += indic.vwap(chart.slice(0,bot.params.window2+i),bot.params.window2) - indic.vwap(chart.slice(0,bot.params.window2+1),bot.params.window1);
         }
-        return (ave/params.len) < (indic.vwap(chart,params.window2) - indic.vwap(chart,params.window1));
+        return (ave/bot.params.len) < (indic.vwap(chart,bot.params.window2) - indic.vwap(chart,bot.params.window1));
       })
       .catch((err)=>{throw( 'Macd2 error: '+err);});
   }
@@ -99,8 +98,7 @@ botSchema.methods.trade = function(trades){
 };
 
 botSchema.methods.run = function(trades){
-  var params = JSON.parse(this.params);
-  return signals[this.signal](this,params)
+  return signals[this.params.signal](this)
     .then((signal)=>{
       if(  ( signal && 0 != this.baseAmt )
         || ( (! signal) && 0 != this.quoteAmt )

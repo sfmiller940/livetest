@@ -8,7 +8,8 @@
       <div class="col col-xs-1">Quote Currency</div>
       <div class="col col-xs-1">Quote Amount</div>
       <div class="col col-xs-2">Signal</div>
-      <div class="col col-xs-3">Params</div>
+      <div class="col col-xs-1">Period</div>
+      <div class="col col-xs-2">Params</div>
       <div class="col col-xs-1 active">Active</div>
     </div>
     <div class="row create">
@@ -29,20 +30,33 @@
         <input v-model="baseAmt" type="number" value="1" step="0.00000001">
       </div>
       <div class="col col-xs-1">
-        <input v-model="quote" type="text" value="BTC">
+        <select v-model="quotes" multiple>
+          <option>BCH</option>
+          <option v-if="base=='USDT'">BTC</option>
+          <option>DASH</option>
+          <option>ETC</option>
+          <option v-if="base!='ETH'">ETH</option>
+          <option>LTC</option>
+          <option>NXT</option>
+          <option>REP</option>
+          <option>STR</option>
+          <option v-if="base!='XMR'">XMR</option>
+          <option>XRP</option>
+          <option>ZEC</option>
+        </select>
       </div>
       <div class="col col-xs-1" class="col col-xs-1">
         <input v-model="quoteAmt" type="number" value="0" step="0.00000001">
       </div>
       <div class="col col-xs-2">
-        <select v-model="signal">
+        <select v-model="params.signal">
           <option value="bladerunner" selected>Bladerunner</option>
           <option value="macd1">Moving Average Crossover</option>
           <option value="macd2">MACD vs Moving MACD Crossover</option>
         </select>
       </div>
-      <div class="col col-xs-3">
-        <select>
+      <div class="col col-xs-1">
+        <select v-model="params.period">
           <option value="300">5 mins</option>
           <option value="900">15 mins</option>
           <option value="1800">30 mins</option>
@@ -50,21 +64,17 @@
           <option value="14400">4 hours</option>
           <option value="86400">1 day</option>
         </select>
-        <label v-if="signal!='bladerunner'"><input type="number" placeholder="window1" step="1" min="2"></label>
-        <label v-if="signal!='bladerunner'"><input type="number" placeholder="window2" step="1" min="2"></label>
-        <label v-if="signal!='macd1'"><input type="number" placeholder="length" step="1" min="2"></label>
-        <textarea v-model="params" rows="4" col col-xss="40">
-  {
-  "len":3,
-  "period":300
-  }
-        </textarea>
+      </div>
+      <div class="col col-xs-2">
+        <input v-model="params.window1" v-if="params.signal!='bladerunner'" type="number" placeholder="short window" step="1" min="2">
+        <input v-model="params.window2" v-if="params.signal!='bladerunner'" type="number" placeholder="long window" step="1" min="2">
+        <input v-model="params.len" v-if="params.signal!='macd1'" type="number" placeholder="length" step="1" min="2">
       </div>
       <div class="col col-xs-1 active">
-        <input v-model="active" type="checkbox" checked>
+        <input v-model="active" type="checkbox">
       </div>
       <div class="col col-xs-1">
-        <button v-on:click="createBot()">create</button>
+        <button v-on:click="createBot(bot)">create</button>
       </div>
     </div>
   </div>
@@ -79,11 +89,16 @@ export default {
       exchange: 'poloniex',
       base: 'USDT',
       baseAmt: 1,
-      quote: 'BTC',
+      quotes: ['BTC'],
       quoteAmt: 0,
-      signal: 'bladerunner',
-      params: '{"period":300,"len":4}',
-      active: true
+      params:{
+        'signal':'macd1',
+        'period':300,
+        'len':'',
+        'window1':'',
+        'window2':''
+      },
+      active: false
     }
   },
   props:['trades'],
@@ -94,9 +109,8 @@ export default {
           exchange: this.exchange,
           base: this.base,
           baseAmt: this.baseAmt,
-          quote: this.quote,
+          quotes: this.quotes,
           quoteAmt: this.quoteAmt,
-          signal: this.signal,
           params: this.params,
           active: this.active
         })
