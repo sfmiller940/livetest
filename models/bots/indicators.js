@@ -8,21 +8,22 @@ const mongoose  = require('mongoose'),
 var poloniex = new Poloniex(),
     poloTicker = {},
     charts = {};
-poloniex.subscribe('ticker');
-poloniex.on('open', () => { logs.log('Poloniex websocket connected'); });
-poloniex.on('close', (reason, details) => { logs.log('Poloniex websocket disconnected: '+reason); });
-poloniex.on('error', (err) => { logs.log('Websockets error: ' + err);})
-poloniex.on('message', (channel, data, seq) => {
-  if (channel === 'ticker') {
-    poloTicker[data.currencyPair]=data;
-  }
-});
-poloniex.openWebSocket({version:2});
-
 
 const indicators = {
 
-  poloniex:poloniex,
+  wsTicker: function(){
+    poloniex.subscribe('ticker');
+    poloniex.on('open', () => { logs.log('Poloniex websocket connected'); });
+    poloniex.on('close', (reason, details) => { logs.log('Poloniex websocket disconnected: '+reason); });
+    poloniex.on('error', (err) => { logs.log('Websockets error: ' + err);})
+    poloniex.on('message', (channel, data, seq) => {
+      if (channel === 'ticker') {
+        poloTicker[data.currencyPair]=data;
+      }
+    });
+    poloniex.openWebSocket({version:2});
+    return poloniex;
+  },
 
   vwap: function(df, len = df.length){
     var total  = 0,
@@ -60,25 +61,28 @@ const indicators = {
     throw('Ticker error: invalid exchange');
   },
 
-  getChart: function(pair,period,len){
-    var now = Math.floor( (new Date()).getTime() / 1000 );
+  getChart: function(bot,len){
+    var pair = bot.pair(),
+        period = bot.params.period,
+        now = Math.floor( (new Date()).getTime() / 1000 );
     if(
       pair in charts
-      && period in charts[pair]
+      && bot.params.period in charts[pair]
       && len <= charts[pair][period].length 
-      && (new Date( charts[pair][period].slice(-1)[0].date ).getTime() / 1000 ) < (now - period)
+      && ( (now-period-60) < (new Date( charts[pair][period].slice(-1)[0].date )).getTime() )
     ) return Promise.resolve(charts[pair][period].slice(-len));
 
     return poloniex.returnChartData(
       pair,
       period,
-      now - ((len+1)*period),
+      now - ((len+10)*period), // Huge lag!
       now
     )
     .then((chart)=>{
+      if( chart.length < len) throw('Chart too short');
       if(!(pair in charts)) charts[pair]={};
       charts[pair][period] = chart;
-      return chart;
+      return chart.slice(-len);
     })
     .catch((err)=>{
       throw('Failed to load chart: '+err);

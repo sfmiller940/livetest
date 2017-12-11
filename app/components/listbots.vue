@@ -6,27 +6,41 @@
       <div class="col col-xs-2">Base</div>
       <div class="col col-xs-2">Quote</div>
       <div class="col col-xs-2">Value</div>
-      <div class="col col-xs-3">Signal{Params}</div>
+      <div class="col col-xs-3">Params</div>
       <div class="col col-xs-1 active">Active</div>
       <div class="col col-xs-1"></div>
     </div>
     <div class="bot row" v-for="bot in bots">
       <div class="col col-xs-1 created">{{bot.created_at | formatDate}}</div>
-      <div class="col col-xs-2">{{bot.baseAmt.toFixed(8)}} {{bot.base}}</div>
-      <div class="col col-xs-2">{{bot.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
+      <div class="col col-xs-2"><transition name="fadegreen">
+        <span :key="bot.baseAmt">{{bot.baseAmt.toFixed(8)}} {{bot.base}}</span>
+      </transition></div>
+      <div class="col col-xs-2"><transition name="fadegreen">
+        <span :key="bot.quoteAmt">{{bot.quoteAmt.toFixed(8)}} {{bot.quote}}</span>
+      </transition></div>
       <div class="col col-xs-2">
-        {{ ( Number(bot.baseAmt) + (Number(bot.quoteAmt) * ticker[bot.base+'_'+bot.quote])).toFixed(8)}}{{bot.base}}
+        <span v-if="ticker[bot.base+'_'+bot.quote]">
+          <transition name="fadegreen">
+            <span :key="ticker[bot.base+'_'+bot.quote]">{{ ( Number(bot.baseAmt) + (Number(bot.quoteAmt) * ticker[bot.base+'_'+bot.quote])).toFixed(8)}}{{bot.base}}</span>
+          </transition>
+        </span>
+        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
       </div>
-      <div class="col col-xs-3">{{bot.signal}}{{bot.params}}</div>
+      <div class="col col-xs-3">{{bot.params}}</div>
       <div class="col col-xs-1 active"><input type="checkbox" v-model="bot.active"></div>
       <div class="col col-xs-1"><button class="delete" v-on:click="deleteBot(bot._id)">delete</button></div>
     </div>
     <div class="totals row">
       <div class="col col-xs-4"><strong>{{bots.length}} Bots</strong></div>
       <div class="col col-xs-1"><strong>Total value:</strong></div>
-      <div class="col col-xs-7"><strong>{{ bots.reduce(function(total,bot){
-        return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
-      },0).toFixed(8) }}</strong></div>
+      <div class="col col-xs-7">
+        <strong v-if="bots.reduce((total,bot)=>{ return total + ticker[bot.base+'_'+bot.quote] },0)">
+          {{ bots.reduce(function(total,bot){
+            return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
+          },0).toFixed(8) }}
+        </strong>
+        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+    </div>
     </div>
   </div>
 </template>

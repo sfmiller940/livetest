@@ -1,6 +1,6 @@
 <template>
   <div id="logs" class="container-fluid">
-    <h2>logs <button v-on:click="clearLogs()">clear</button></h2>
+    <h2>logs <button v-on:click="clearLogs()" class="clear">clear</button></h2>
     <div class="log row" v-for="log in logs">
       <div class="col col-xs-2">{{log.created_at | formatDate}}</div>
       <div class="col col-xs-10">{{log.message}}</div>

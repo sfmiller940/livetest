@@ -18,9 +18,7 @@ var runServer = function(logs,bots,trades){
 
     .get('/logs/clear', (req, res)=>{
       logs.remove({})
-        .then(()=>{
-          res.json({"response":true});
-        })
+        .then(()=>{ res.json({"response":true}); })
         .catch((err)=>{ console.log('Error clearing logs: '+err); });
     })
 
@@ -28,29 +26,27 @@ var runServer = function(logs,bots,trades){
       logs.find({})
         .sort('-created_at')
         .batchSize(100000)
-        .exec((err, docs)=>{
-          if(err) console.log(err);
-          res.json(docs);
-        }
-      );
+        .exec()
+        .then((docs)=>{ res.json(docs); })
+        .catch((err)=>{ console.log(err); });
     })
 
     .get('/bots/delete/:botid',(req,res)=>{
-      bots.findById(req.params.botid).remove((err,message)=>{
-        if(err) res.redirect('/?botDeleted=false');
-        else res.redirect('/?botDeleted=true');
-      });
+      bots
+        .findById(req.params.botid)
+        .remove()
+        .then((message)=>{ res.redirect('/?botDeleted=true'); })
+        .catch((err)=>{ res.redirect('/?botDeleted=false'); });
     })
 
     .get('/bots', (req, res)=>{
-      bots.find({})
+      bots
+        .find({})
         .sort('-created_at')
         .batchSize(100000)
-        .exec((err, docs)=>{
-          if(err) console.log(err);
-          res.json(docs);
-        }
-      );
+        .exec()
+        .then((docs)=>{ res.json(docs); })
+        .catch((err)=>{ console.log(err); });
     })
 
     .post('/bots',(req,res)=>{
@@ -67,9 +63,7 @@ var runServer = function(logs,bots,trades){
           });
         })
       )
-      .then((results)=>{
-        res.redirect('/?botCreated=true');
-      })
+      .then((results)=>{ res.redirect('/?botCreated=true'); })
       .catch((err)=>{
         console.log('Error saving bot: '+err);
         res.redirect('/?botCreated=false');
@@ -77,32 +71,29 @@ var runServer = function(logs,bots,trades){
     })
 
     .post('/bots/update/:botid',(req,res)=>{
-      bots.update(
-        {_id:req.params.botid},
-        {$set:{ 
-          pair:req.body.pair,
-          signal:req.body.signal,
-          params:req.body.params,
-          base:req.body.base,
-          quote:req.body.quote,
-          active: ( req.body.active ? true : false)
-        }},
-        (err,bot)=>{
-          if(err) res.send(err.message);
-          else res.send('true');
-        }
-      );
+      bots
+        .update(
+          {_id:req.params.botid},
+          {$set:{ 
+            pair:req.body.pair,
+            signal:req.body.signal,
+            params:req.body.params,
+            base:req.body.base,
+            quote:req.body.quote,
+            active: ( req.body.active ? true : false)
+          }}
+        )
+        .then((bot)=>{ res.send('true'); })
+        .catch((err)=>{ res.send(err.message); });
     })
 
     .get('/trades', (req, res)=>{
       trades.find({})
         .sort('-created_at')
         .batchSize(100000)
-        .exec((err, docs)=>{
-          if(err) console.log(err);
-          res.json(docs);
-        }
-      );
+        .exec()
+        .then((docs)=>{ res.json(docs); })
+        .catch((err)=>{ console.log(err); });
     })
 
     .listen(app.get('port'),()=>{

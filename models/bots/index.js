@@ -6,13 +6,8 @@ const mongoose       = require('mongoose'),
 
 var logs = mongoose.model('logs', logSchema),
     runningBots = [],
-    polo = false;
-
-indic.poloniex.on('open', () => { polo=true; });
-indic.poloniex.on('close', () => {
-  polo=false;
-  indic.poloniex.openWebSocket({version:2});
-});
+    polo = false,
+    broadcast;
 
 var botSchema = new Schema({
   exchange:    String,
@@ -38,7 +33,7 @@ var signals = {
     return Promise
       .all([
         indic.getTicker(bot.exchange,bot.pair()),
-        indic.getChart(bot.pair(),bot.params.period,bot.params.len)
+        indic.getChart(bot,bot.params.len)
       ])
       .then(([ticker,chart])=>{
         if( (! ticker) || (! chart) ) return false;
@@ -48,7 +43,7 @@ var signals = {
   },
   'macd1':function(bot){
     return indic
-      .getChart(bot.pair(),bot.params.period,bot.params.window2)
+      .getChart(bot,bot.params.window2)
       .then((chart)=>{
         return indic.vwap(chart,bot.params.window2) < indic.vwap(chart,bot.params.window1);
       })
@@ -56,7 +51,7 @@ var signals = {
   },
   'macd2':function(bot){
     return indic
-      .getChart(bot.pair(),bot.params.period,bot.params.window2 + bot.params.len)
+      .getChart(bot,bot.params.window2 + bot.params.len)
       .then((chart)=>{
         var ave=0;
         for(var i=0;i<bot.params.len;i++){
@@ -83,12 +78,16 @@ botSchema.methods.trade = function(trades){
         this.quoteAmt = 0;
       }
       return this.save()
-        .then((bot) => { 
+        .then((bot) => {
           return trades.log({
             bot:this,
             baseAmt:this.baseAmt,
             quoteAmt:this.quoteAmt,
             price: price
+          })
+          .then((trade)=>{
+            broadcast({'trade':trade});
+            return Promise.resolve(trade);
           })
           .catch((err)=>{ throw('Error saving trade: '+err) });
         })
@@ -123,6 +122,20 @@ botSchema.statics.run = function(trades){
     })
     .catch((err)=>{ logs.log('Error finding bots: '+err); });
   console.log( (new Date().toLocaleString()) + ' running bots');
+};
+
+botSchema.statics.wsTicker = function(){
+  var poloniex = indic.wsTicker();
+  poloniex.on('open', () => { polo=true; });
+  poloniex.on('close', () => {
+    polo=false;
+    poloniex.openWebSocket({version:2});
+  });
+};
+
+botSchema.statics.setWS = function(ws){ 
+  broadcast = ws;
+  logs.setWS(ws);
 };
 
 module.exports = botSchema;

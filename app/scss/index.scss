@@ -16,17 +16,30 @@ body{
 button,
 input[type="text"],
 input[type="number"],
+input[type="checkbox"],
 select{
   display: inline-block;
   position: relative;
   padding: 0.5rem;
-  background: none;
+  background: #dfe;
   border: 1px solid #ccc;
   border-radius: 0.25rem;
   cursor: pointer;
 }
 select[multiple]{
   height: 180px;
+}
+button:hover,
+input:focus,
+input:active,
+select:active,
+select:focus{
+  border-color: #000;
+  outline: none;
+}
+button.clear,
+button.delete{
+  background: #fde;
 }
 form{
   margin: 0;
@@ -114,10 +127,22 @@ h2{
           padding-top: 0;
         }
       }
-
-      button{
-        background: #fff;
-      }
     }
+  }
+}
+
+.fadegreen{
+  &-enter{
+    opacity: 0;
+    color: green;
+  }
+  &-enter-active {
+    transition: color 4s 1s ease, opacity 1s ease;
+  }
+  &-leave-active {
+    display:none;
+  }
+  &-leave-to{
+    display:none;
   }
 }
