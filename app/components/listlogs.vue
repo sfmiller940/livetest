@@ -20,6 +20,7 @@ export default {
   props:['logs'],
   methods:{
     clearLogs:function(){
+      var self=this;
       axios.get('/logs/clear').then((response)=>{
         self.$emit('loadlogs');
       })

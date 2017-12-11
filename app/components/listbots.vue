@@ -1,6 +1,20 @@
 <template>
   <div id="bots" class="container-fluid">
     <h2>bots</h2>
+    <div class="totals row">
+      <div class="col col-xs-1"><strong>Total Bots:</strong></div>
+      <div class="col col-xs-3"><strong>{{bots.length}}</strong></div>
+      <div class="col col-xs-1"><strong>Total value:</strong></div>
+      <div class="col col-xs-7">
+        <strong v-if="bots.reduce((total,bot)=>{
+            return total + ticker[bot.base+'_'+bot.quote]; },0)">
+          {{ bots.reduce(function(total,bot){
+            return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
+          },0).toFixed(8) }}
+        </strong>
+        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+      </div>
+    </div>
     <div class="currency_base" v-for="currbase in ['BTC','ETH','USDT','XMR']">
       <h3>{{ currbase }}</h3>
       <div class="row header">
@@ -46,20 +60,6 @@
           </strong>
           <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
-      </div>
-    </div>
-    <h3>Total</h3>
-    <div class="totals row">
-      <div class="col col-xs-4"><strong>{{bots.length}} Bots</strong></div>
-      <div class="col col-xs-1"><strong>Total value:</strong></div>
-      <div class="col col-xs-7">
-        <strong v-if="bots.reduce((total,bot)=>{
-            return total + ticker[bot.base+'_'+bot.quote]; },0)">
-          {{ bots.reduce(function(total,bot){
-            return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
-          },0).toFixed(8) }}
-        </strong>
-        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
       </div>
     </div>
   </div>
