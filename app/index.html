@@ -19,7 +19,10 @@
       </header>
 
       <div id="botwatch">
-        <listlogs :logs="logs"></listlogs>
+        <listlogs
+          :logs="logs"
+          v-on:loadlogs="loadLogs"
+        ></listlogs>
         <createbot
           v-on:loadbots="loadBots"
         ></createbot>

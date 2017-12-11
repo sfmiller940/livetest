@@ -21,7 +21,7 @@ export default {
   methods:{
     clearLogs:function(){
       axios.get('/logs/clear').then((response)=>{
-        this.logs=[];
+        self.$emit('loadlogs');
       })
       .catch((err)=>{ console.log('Error clearing logs: '+err); });
     }

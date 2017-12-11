@@ -22,8 +22,8 @@
         <select v-model="base">
           <option value="BTC">BTC</option>
           <option value="ETH">ETH</option>
-          <option value="XMR">XMR</option>
           <option value="USDT" selected>USDT</option>
+          <option value="XMR">XMR</option>
         </select>
       </div>
       <div class="col col-xs-1">
