@@ -2,7 +2,7 @@
 const { logs:logs,
         bots:bots,
         trades:trades
-      }        = require('./models');
+      } = require('./models');
 
 if (process.env.NODE_ENV === 'server') {
   const server   = require('./server');
@@ -11,9 +11,7 @@ if (process.env.NODE_ENV === 'server') {
 else{
   bots.wsTicker();
   bots.setWS( require('./conns/ws') );
-  var runBots = function(){
+  setInterval(()=>{
     bots.run(trades);
-    setTimeout(runBots,5000);
-  }
-  runBots();
+  },5000);
 }
