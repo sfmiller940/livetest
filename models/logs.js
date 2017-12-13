@@ -17,6 +17,6 @@ logSchema.statics.log = function(message) {
     .catch((err)=>{ console.log('Log save error: '+err); });
 };
 
-logSchema.statics.setWS = function(ws){ broadcast = ws; };
+logSchema.statics.config = function(_broadcast){ broadcast = _broadcast; };
 
 module.exports = logSchema;

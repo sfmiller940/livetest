@@ -21,10 +21,10 @@ export default {
   methods:{
     clearLogs:function(){
       var self=this;
-      axios.get('/logs/clear').then((response)=>{
-        self.$emit('loadlogs');
-      })
-      .catch((err)=>{ console.log('Error clearing logs: '+err); });
+      axios
+        .get('/logs/clear')
+        .then((response)=>{ self.logs.splice(0,self.logs.length); })
+        .catch((err)=>{ console.log('Error clearing logs: '+err); });
     }
   }
 }

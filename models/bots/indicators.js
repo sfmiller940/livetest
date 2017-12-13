@@ -1,29 +1,21 @@
 "use strict"
-const mongoose  = require('mongoose'),
-      bittrex   = require('node-bittrex-api'),
-      Poloniex  = require('poloniex-api-node'),
-      logSchema = require('../logs'),
-      logs      = mongoose.model('logs', logSchema);
+const bittrex = require('node-bittrex-api');
 
-var poloniex = new Poloniex(),
+var poloniex,
     poloTicker = {},
     charts = {};
 
-function wsTicker(){
+var config = function(_poloniex){
+  poloniex=_poloniex;
   poloniex.subscribe('ticker');
-  poloniex.on('open', () => { logs.log('Poloniex websocket connected'); });
-  poloniex.on('close', (reason, details) => { logs.log('Poloniex websocket disconnected: '+reason); });
-  poloniex.on('error', (err) => { logs.log('Websockets error: ' + err);})
   poloniex.on('message', (channel, data, seq) => {
     if (channel === 'ticker') {
       poloTicker[data.currencyPair]=data;
     }
   });
-  poloniex.openWebSocket({version:2});
-  return poloniex;
-}
+};
 
-function vwap(df, len = df.length){
+var vwap = function (df, len = df.length){
   var total  = 0,
       volume = 0;
   for(var i=(df.length - len);i<df.length;i++){
@@ -31,9 +23,9 @@ function vwap(df, len = df.length){
     volume += df[i].volume;
   }
   return total / volume;
-}
+};
 
-function getTicker(exchange,pair){
+var getTicker = function(exchange,pair){
   switch(exchange){
     case 'bittrex':
       return bittrex
@@ -57,9 +49,9 @@ function getTicker(exchange,pair){
     break;
   }
   throw('Ticker error: invalid exchange');
-}
+};
 
-function getChart(bot,len,delta=10){
+var getChart = function(bot,len,delta=10){
   var pair = bot.pair(),
       period = bot.params.period,
       now = Math.floor( (new Date()).getTime() / 1000 );
@@ -88,9 +80,41 @@ function getChart(bot,len,delta=10){
   });
 }
 
+var signals = {
+  'bladerunner':function(bot){
+    return Promise
+      .all([
+        getTicker(bot.exchange,bot.pair()),
+        getChart(bot,bot.params.len)
+      ])
+      .then(([ticker,chart])=>{
+        if( (! ticker) || (! chart) ) return false;
+        return vwap(chart,bot.params.len) < (ticker.ask/2 + ticker.bid/2);
+      })
+      .catch((err)=>{ throw('Bladerunner error: '+err); });
+  },
+  'macd1':function(bot){
+    return getChart(bot,bot.params.window2)
+      .then((chart)=>{
+        return vwap(chart,bot.params.window2) < vwap(chart,bot.params.window1);
+      })
+      .catch((err)=>{throw( 'Macd1 error: '+err);});
+  },
+  'macd2':function(bot){
+    return getChart(bot,bot.params.window2 + bot.params.len)
+      .then((chart)=>{
+        var ave=0;
+        for(var i=0;i<bot.params.len;i++){
+          ave += vwap(chart.slice(0,bot.params.window2+i),bot.params.window2) - vwap(chart.slice(0,bot.params.window2+1),bot.params.window1);
+        }
+        return (ave/bot.params.len) < (vwap(chart,bot.params.window2) - vwap(chart,bot.params.window1));
+      })
+      .catch((err)=>{throw( 'Macd2 error: '+err);});
+  }
+};
+
 module.exports = {
-  wsTicker: wsTicker,
-  vwap: vwap,
+  config:config,
   getTicker:getTicker,
-  getChart:getChart
+  signals:signals
 };

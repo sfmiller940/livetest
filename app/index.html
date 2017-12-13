@@ -21,15 +21,13 @@
       <div id="botwatch">
         <listlogs
           :logs="logs"
-          v-on:loadlogs="loadLogs"
         ></listlogs>
         <createbot
-          v-on:loadbots="loadBots"
+          :bots="bots"
         ></createbot>
         <listbots 
           :bots="bots"
           :ticker="ticker"
-          v-on:loadbots="loadBots"
         ></listbots>
         <listtrades :trades="trades"></listlogs>
       </div>

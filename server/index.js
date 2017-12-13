@@ -4,7 +4,21 @@ const express      = require('express'),
       path         = require('path'),
       bodyParser   = require('body-parser');
 
-var runServer = function(logs,bots,trades){
+var runServer = function(logs,bots,trades,wss){
+
+  wss.on('connection', function connection(ws) {
+    ws.on('message', function incoming(message) {
+      console.log('received: %s', message);
+    });
+
+    Promise.all([
+      logs.find({}).sort('-created_at').batchSize(100000).exec(),
+      bots.find({}).sort('-created_at').batchSize(100000).exec(),
+      trades.find({}).sort('-created_at').batchSize(100000).exec()
+    ])
+    .then(([logs,bots,trades])=>{ ws.send(JSON.stringify({'init':{'logs':logs,'bots':bots,'trades':trades}})); })
+    .catch((err)=>"Error getting models: "+err);
+  });
 
   app
 
@@ -19,7 +33,10 @@ var runServer = function(logs,bots,trades){
     .get('/logs/clear', (req, res)=>{
       logs.remove({})
         .then(()=>{ res.json({"response":true}); })
-        .catch((err)=>{ console.log('Error clearing logs: '+err); });
+        .catch((err)=>{ 
+          console.log('Error clearing logs: '+err);
+          res.status(400).send({ message: 'Error clearing logs: '+err});
+        });
     })
 
     .get('/logs', (req, res)=>{
@@ -35,8 +52,11 @@ var runServer = function(logs,bots,trades){
       bots
         .findById(req.params.botid)
         .remove()
-        .then((message)=>{ res.redirect('/?botDeleted=true'); })
-        .catch((err)=>{ res.redirect('/?botDeleted=false'); });
+        .then((message)=>{ res.json(message); })
+        .catch((err)=>{
+          console.log('Error deleting bot: '+err);
+          res.status(400).send({ message: 'Error deleting bot: '+err});
+        });
     })
 
     .get('/bots', (req, res)=>{
@@ -63,10 +83,10 @@ var runServer = function(logs,bots,trades){
           });
         })
       )
-      .then((results)=>{ res.redirect('/?botCreated=true'); })
+      .then((newBots)=>{ res.json(newBots); })
       .catch((err)=>{
-        console.log('Error saving bot: '+err);
-        res.redirect('/?botCreated=false');
+        console.log('Error saving bots: '+err);
+        res.status(400).send({ message: 'Error saving bots: '+err});
       });
     })
 

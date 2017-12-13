@@ -95,7 +95,7 @@
 <script>
 const axios = require('axios');
 export default {
-  name: 'listtrades',
+  name: 'createbot',
   data () {
     return {
       exchange: 'poloniex',
@@ -113,7 +113,7 @@ export default {
       active: false
     }
   },
-  props:['trades'],
+  props:['bots'],
   methods:{
     createBot:function(){
       var self = this;
@@ -127,7 +127,9 @@ export default {
           active: this.active
         })
         .then(function (response) {
-          self.$emit('loadbots');
+          response.data.forEach((bot)=>{ 
+            self.bots.splice(0,0,bot); 
+          });
         })
         .catch((err)=>{ console.log("Error creating bot: "+err); });
     }

@@ -13,4 +13,4 @@ wss.broadcast = function broadcast(data) {
   });
 };
 
-module.exports = wss.broadcast;
+module.exports = wss;

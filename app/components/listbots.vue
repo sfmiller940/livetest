@@ -81,7 +81,7 @@ export default {
       axios
         .get('/bots/delete/'+id)
         .then((response)=>{
-          self.$emit('loadbots');
+          self.bots.splice(self.bots.findIndex((bot)=>{ return bot._id == id; }),1);
         })
         .catch((err)=>{console.log('Error deleting bot: '+err)});
     }
