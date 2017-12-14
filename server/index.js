@@ -110,6 +110,15 @@ var runServer = function(logs,bots,trades,wss){
     .get('/trades', (req, res)=>{
       trades.find({})
         .sort('-created_at')
+        .batchSize(100)
+        .exec()
+        .then((docs)=>{ res.json(docs); })
+        .catch((err)=>{ console.log(err); });
+    })
+
+    .get('/trades/bot/:botid', (req, res)=>{
+      trades.find({bot:req.params.botid})
+        .sort('-created_at')
         .batchSize(100000)
         .exec()
         .then((docs)=>{ res.json(docs); })

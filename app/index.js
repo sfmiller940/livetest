@@ -40,8 +40,9 @@ var botwatch = new Vue({
     poloWS.onerror = function(err,details){ console.log('Polo WS error: '+err); };
     poloWS.onclose = function(err,details){ console.log('Polo WS disconnected: '+err); };
     poloWS.onopen = function (session,details) {
-      console.log('Polo WS connected');
+      console.log('Polo WS connected: ', details);
       function loadTicker(args) {
+        console.log(args);
         Vue.set( botwatch.ticker, args[0] , (Number(args[2]) + Number(args[3]))/2 );
       }
       session.subscribe('ticker', loadTicker);
@@ -51,7 +52,7 @@ var botwatch = new Vue({
     function startLocalWS(server,onMessage){
       const localWS = new WebSocket(server);
       localWS.addEventListener('open', function (event) {
-          console.log(server+' WS opened: '+event);
+          console.log(server+' WS opened: ', event);
       });
       localWS.addEventListener('close', function (close) {
           console.log(server+' WS closed: '+close);
@@ -72,6 +73,7 @@ var botwatch = new Vue({
       else if('log' in message) botwatch.logs.splice(0,0,message.log);
       else if('trade' in message){
         botwatch.trades.splice(0,0,message.trade);
+        botwatch.trades.pop();
 
         var botInd = botwatch.bots.findIndex((bot)=>{ return bot._id == message.trade.bot[0]; });
         var newBot = botwatch.bots[botInd];
