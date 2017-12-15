@@ -83,7 +83,7 @@
         <input v-model.number="params.len" v-if="params.signal!='macd1'" type="number" placeholder="length" step="1" min="2">
       </div>
       <div class="col col-xs-1 active">
-        <input v-model="active" type="checkbox">
+        <label class="active"><input v-model="active" type="checkbox"><i class="fa fa-check"></i></label>
       </div>
       <div class="col col-xs-1">
         <button v-on:click="createBot(bot)">create</button>

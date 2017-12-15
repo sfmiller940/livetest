@@ -146,3 +146,38 @@ h2{
     display:none;
   }
 }
+
+label.active,
+label.trades{
+  display: inline-block;
+  background: #dfe;
+  border: 1px solid #000;
+  height: 1.5rem;
+  width: 1.5rem;
+  text-align: center;
+
+  input{
+    display: none;
+  }
+}
+
+label.active{
+  i.fa{
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  input:checked + i.fa{
+    opacity:1;
+  }
+}
+
+label.trades{
+  i.fa{
+    transition: transform 0.5s;
+  }
+
+  input:checked + i.fa{
+    transform: rotate(180deg);
+  }
+}

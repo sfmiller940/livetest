@@ -5,7 +5,8 @@ import listbots from './components/listbots.vue'
 import listtrades from './components/listtrades.vue'
 import moment from 'moment-timezone'
 const autobahn = require('autobahn'),
-      axios    = require('axios');
+      axios    = require('axios'),
+      Wampy    = require('wampy').Wampy;
 
 Vue.filter('formatDate', function(value) {
   if (value) {
@@ -41,13 +42,34 @@ var botwatch = new Vue({
     poloWS.onclose = function(err,details){ console.log('Polo WS disconnected: '+err); };
     poloWS.onopen = function (session,details) {
       console.log('Polo WS connected: ', details);
-      function loadTicker(args) {
+      session.subscribe('ticker', function(args,kwargs,details){
         console.log(args);
         Vue.set( botwatch.ticker, args[0] , (Number(args[2]) + Number(args[3]))/2 );
-      }
-      session.subscribe('ticker', loadTicker);
+      })
+      .then((subscription)=>{
+        console.log(subscription);
+        console.log(session.subscriptions);
+      })
+      .catch((err)=>{ console.log(err); });
     };
     poloWS.open();
+
+    /*const ws = new Wampy('wss://api.poloniex.com',{realm:'realm1'});
+    ws.options({
+      reconnectInterval: 1000,
+      maxRetries: 999,
+      onConnect: function () { console.log('Yahoo! We are online!'); },
+      onClose: function () { console.log('See you next time!'); },
+      onError: function () { console.log('Breakdown happened'); },
+      onReconnect: function () { console.log('Reconnecting...'); },
+      onReconnectSuccess: function () { console.log('Reconnection succeeded...'); }
+    });
+    ws.subscribe('ticker', {
+      onSuccess: function () { console.log('Successfully subscribed to topic'); },
+      onError: function (err) { console.log('Subscription error:' + err.error); },
+      onEvent: function (result) { console.log('Received topic event'); }
+    });
+    ws.connect();*/
 
     function startLocalWS(server,onMessage){
       const localWS = new WebSocket(server);

@@ -14,7 +14,7 @@ var runServer = function(logs,bots,trades,wss){
     Promise.all([
       logs.find({}).sort('-created_at').batchSize(100000).exec(),
       bots.find({}).sort('-created_at').batchSize(100000).exec(),
-      trades.find({}).sort('-created_at').batchSize(100000).exec()
+      trades.find({}).sort('-created_at').limit(50).exec()
     ])
     .then(([logs,bots,trades])=>{ ws.send(JSON.stringify({'init':{'logs':logs,'bots':bots,'trades':trades}})); })
     .catch((err)=>"Error getting models: "+err);
@@ -107,10 +107,22 @@ var runServer = function(logs,bots,trades,wss){
         .catch((err)=>{ res.send(err.message); });
     })
 
+    .get('/bots/activate/:botid',(req,res)=>{
+      bots
+        .findOne({_id:req.params.botid})
+        .then((bot)=>{
+          bot.active = ! bot.active;
+          bot
+            .save()
+            .then((bot)=>{ res.json(bot); })
+        })
+        .catch((err)=>{ res.send(err.message); });
+    })
+
     .get('/trades', (req, res)=>{
       trades.find({})
         .sort('-created_at')
-        .batchSize(100)
+        .batchsize(100000)
         .exec()
         .then((docs)=>{ res.json(docs); })
         .catch((err)=>{ console.log(err); });

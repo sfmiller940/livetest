@@ -29,7 +29,7 @@
       </div>
       <div class="bot row" v-for="(bot,ind) in bots" v-if="bot.base==currbase">
         <div class="col col-xs-1 created">
-          <label><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-down"></i></label>
+          <label class="trades"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
         </div>
         <div class="col col-xs-1 created">{{bot.created_at | formatDate}}</div>
         <div class="col col-xs-2"><transition name="fadegreen">
@@ -47,7 +47,7 @@
           <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
         <div class="col col-xs-2">{{bot.params}}</div>
-        <div class="col col-xs-1 active"><input type="checkbox" v-model="bot.active"></div>
+        <div class="col col-xs-1 active"><label class="active"><input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot._id)"><i class="fa fa-check"></i></label></div>
         <div class="col col-xs-1">
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
@@ -122,6 +122,12 @@ export default {
           })
           .catch((err)=>{console.log('Error getting trades: '+err);});
       }
+    },
+    toggleActive:function(botid){
+      var self=this;
+      axios
+        .get('bots/activate/'+botid)
+        .catch((err)=>{console.log('Error activating bot: '+err)});
     }
   }
 }

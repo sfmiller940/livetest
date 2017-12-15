@@ -1,6 +1,6 @@
 <template>
   <div id="trades" class="container-fluid">
-    <h2>trades</h2>
+    <h2>recent trades</h2>
     <div class="row header">
       <div class="col col-xs-2">Created</div>
       <div class="col col-xs-10">Bot</div>
