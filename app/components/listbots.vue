@@ -47,7 +47,9 @@
           <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
         <div class="col col-xs-2">{{bot.params}}</div>
-        <div class="col col-xs-1 active"><label class="active"><input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot._id)"><i class="fa fa-check"></i></label></div>
+        <div class="col col-xs-1 active">
+          <label class="active"><input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot)"><i class="fa fa-check"></i></label>
+        </div>
         <div class="col col-xs-1">
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
@@ -123,11 +125,11 @@ export default {
           .catch((err)=>{console.log('Error getting trades: '+err);});
       }
     },
-    toggleActive:function(botid){
+    toggleActive:function(bot){
       var self=this;
       axios
-        .get('bots/activate/'+botid)
-        .catch((err)=>{console.log('Error activating bot: '+err)});
+        .get('bots/activate/'+bot._id)
+        .catch((err)=>{ console.log('Error activating bot: '+err) });
     }
   }
 }

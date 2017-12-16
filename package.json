@@ -8,13 +8,11 @@
     "bots": "node index"
   },
   "dependencies": {
-    "autobahn": "*",
     "axios": "*",
     "bootstrap-grid": "*",
     "moment": "*",
     "moment-timezone": "*",
-    "vue": "^2.5.8",
-    "wampy": "*"
+    "vue": "^2.5.8"
   },
   "browserslist": [
     "> 1%",
