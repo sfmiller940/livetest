@@ -9,9 +9,14 @@ body{
   font-family: 'Roboto', sans-serif;
   padding: 1rem;
   margin: 0;
+  background: #333;
+  color: #333;
 }
 #page{
   font-size: 1.0666rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f0f0f0;
 }
 button,
 input[type="text"],
@@ -34,7 +39,7 @@ input:focus,
 input:active,
 select:active,
 select:focus{
-  border-color: #000;
+  border-color: #333;
   outline: none;
 }
 button.clear,
@@ -150,12 +155,17 @@ h2{
 label.active,
 label.trades{
   display: inline-block;
-  background: #dfe;
-  border: 1px solid #000;
+  background: #fde;
+  border: 1px solid #333;
   height: 1.5rem;
   width: 1.5rem;
   text-align: center;
   cursor: pointer;
+  transition: background 0.4s;
+
+  &.clicked{
+    background: #dfe;
+  }
 
   input{
     display: none;
@@ -163,9 +173,15 @@ label.trades{
 }
 
 label.active{
+  background: #fde;
+  
+  &.clicked{
+    background: #dfe;
+  }
+
   i.fa{
     opacity: 0;
-    transition: opacity 0.25s;
+    transition: opacity 0.4s;
   }
 
   input:checked + i.fa{
@@ -174,8 +190,14 @@ label.active{
 }
 
 label.trades{
+  background: #dfe;
+
+  &.clicked{
+    background: #fde;
+  }
+
   i.fa{
-    transition: transform 0.5s;
+    transition: transform 0.4s;
   }
 
   input:checked + i.fa{

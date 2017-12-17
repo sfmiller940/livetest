@@ -7,10 +7,6 @@ const express      = require('express'),
 var runServer = function(logs,bots,trades,wss){
 
   wss.on('connection', function connection(ws) {
-    ws.on('message', function incoming(message) {
-      console.log('received: %s', message);
-    });
-
     Promise.all([
       logs.find({}).sort('-created_at').batchSize(100000).exec(),
       bots.find({}).sort('-created_at').batchSize(100000).exec(),

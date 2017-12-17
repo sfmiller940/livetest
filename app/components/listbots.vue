@@ -29,9 +29,9 @@
       </div>
       <div class="bot row" v-for="(bot,ind) in bots" v-if="bot.base==currbase">
         <div class="col col-xs-1 created">
-          <label class="trades"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
+          <label v-bind:class="{ trades:true, clicked:bot.trades }"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
         </div>
-        <div class="col col-xs-1 created">{{bot.created_at | formatDate}}</div>
+        <div class="col col-xs-1 created">{{bot.created_at | niceDate}}</div>
         <div class="col col-xs-2"><transition name="fadegreen">
           <span :key="bot.baseAmt">{{bot.baseAmt.toFixed(8)}} {{bot.base}}</span>
         </transition></div>
@@ -48,12 +48,19 @@
         </div>
         <div class="col col-xs-2">{{bot.params}}</div>
         <div class="col col-xs-1 active">
-          <label class="active"><input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot)"><i class="fa fa-check"></i></label>
+          <label v-bind:class="{ active:true, clicked:bot.active }">
+            <input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot)"><i class="fa fa-check"></i>
+          </label>
         </div>
         <div class="col col-xs-1">
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
         <div class="col col-xs-12" v-if="bot.trades">
+          <h4>Price vs Value</h4>
+          <div class="row graph">
+            <div class="col col-xs-12" v-bind:id="'graph_'+bot._id"></div>
+          </div>
+          <h4>Recent Trades</h4>
           <div class="row header">
             <div class="col col-xs-1">Created</div>
             <div class="col col-xs-2">Price</div>
@@ -61,8 +68,8 @@
             <div class="col col-xs-2">Quote Amount</div>
             <div class="col col-xs-2">Value</div>
           </div>
-          <div class="row bot-trade" v-for="trade in bot.trades">
-            <div class="col col-xs-1">{{trade.created_at | formatDate}}</div>
+          <div class="row bot-trade" v-for="trade in bot.trades.slice(0,10)">
+            <div class="col col-xs-1">{{trade.created_at | niceDate}}</div>
             <div class="col col-xs-2">{{trade.price.toFixed(8)}} {{bot.base}}_{{bot.quote}}</div>
             <div class="col col-xs-2">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
             <div class="col col-xs-2">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
@@ -121,6 +128,7 @@ export default {
           .then((response)=>{
             bot['trades'] = response.data;
             self.bots.splice( ind, 1, bot );
+            self.graphBot(bot,self);
           })
           .catch((err)=>{console.log('Error getting trades: '+err);});
       }
@@ -130,6 +138,77 @@ export default {
       axios
         .get('bots/activate/'+bot._id)
         .catch((err)=>{ console.log('Error activating bot: '+err) });
+    },
+    graphBot:function(bot,self){
+
+      self.$nextTick(()=>{
+
+        var d3 = Plotly.d3;
+        var gd3 = d3.select('#graph_'+bot._id)
+            .append('div')
+            .style({
+                width: '100%',
+                height: '100%'
+            });
+        var gd = gd3.node();
+
+        var traces = [];
+        
+        traces[0]={
+          x: bot.trades.map(function(trade){ return self.$options.filters.plotlyDate(trade.created_at); }),
+          y: bot.trades.map(function(trade){ return Number(trade.baseAmt) + (Number(trade.quoteAmt)*Number(trade.price)); }),
+          type: 'scatter',
+          marker: {
+            color: 'rgb(125,125,255)'
+          }
+        };
+
+        axios
+          .get( 'https://poloniex.com/public?command=returnChartData'
+              + '&currencyPair=' + bot.base + '_' + bot.quote
+              + '&start=' + parseInt( new Date( bot.trades[bot.trades.length-1].created_at ).getTime() / 1000 )
+              + '&end='+ parseInt( new Date().getTime() / 1000 )
+              + '&period=' + bot.params.period )
+          .then((prices)=>{
+            prices = prices.data
+            traces[1]={
+              x: prices.map(function(slice){ 
+                return self.$options.filters.plotlyDate(new Date(slice.date * 1000).toISOString()); 
+              }),
+              y: prices.map(function(slice){ return slice.weightedAverage }),
+              name: 'yaxis2 data',
+              yaxis: 'y2',
+              type: 'scatter',
+              marker: {
+                color: 'rgba(255, 125, 125, 1.0 )'
+              }
+            };
+            Plotly.newPlot(gd,traces, {
+              paper_bgcolor: 'rgba(245,246,249,0)',
+              plot_bgcolor: 'rgba(245,246,249,0)',
+              showlegend: false,
+              annotations: [],
+              xaxis : { type:'date' },
+              yaxis1: {
+                tickfont: {color: 'rgb(125, 125, 255)'},
+                title: 'Value',
+                titlefont: {
+                  color: 'rgb(125,125,255)',
+                }
+              },
+              yaxis2: {
+                tickfont: {color: 'rgb(255, 125, 125)'},
+                overlaying: 'y',
+                side: 'right',
+                title: 'Price',
+                titlefont:{
+                  color: 'rgb(255,125,125)',
+                },
+              }
+            });
+          })
+          .catch((err)=>{console.log('Failed to get chart: ',err);});
+      });
     }
   }
 }

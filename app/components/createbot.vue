@@ -40,6 +40,7 @@
           <option v-if="base!='ETH'">DASH</option>
           <option v-if="base!='XMR'">ETC</option>
           <option v-if="base!='ETH'&&base!='XMR'">ETH</option>
+          <option v-if="base=='BTC'">FCT</option>
           <option v-if="base=='ETH'||base=='BTC'">GAS</option>
           <option v-if="base=='ETH'||base=='BTC'">GNO</option>
           <option v-if="base=='ETH'||base=='BTC'">GNT</option>
@@ -83,7 +84,7 @@
         <input v-model.number="params.len" v-if="params.signal!='macd1'" type="number" placeholder="length" step="1" min="2">
       </div>
       <div class="col col-xs-1 active">
-        <label class="active"><input v-model="active" type="checkbox"><i class="fa fa-check"></i></label>
+        <label v-bind:class="{ active:true, clicked:active }"><input v-model="active" type="checkbox"><i class="fa fa-check"></i></label>
       </div>
       <div class="col col-xs-1">
         <button v-on:click="createBot(bot)">create</button>

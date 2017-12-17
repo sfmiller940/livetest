@@ -8,11 +8,13 @@ var poloniex,
 var config = function(_poloniex){
   poloniex=_poloniex;
   poloniex.subscribe('ticker');
-  poloniex.on('message', (channel, data, seq) => {
-    if (channel === 'ticker') {
-      poloTicker[data.currencyPair]=data;
-    }
-  });
+  poloniex
+    .on('message', (channel, data, seq) => {
+      if (channel === 'ticker') {
+        if( ! data.currencyPair ) console.log('Missing currencyPair: '+data);
+        poloTicker[data.currencyPair]=data;
+      }
+    })
 };
 
 var vwap = function (df, len = df.length){

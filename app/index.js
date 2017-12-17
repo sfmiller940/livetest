@@ -1,19 +1,26 @@
 const AUTOBAHN_DEBUG = true;
 
-import Vue from 'vue'
-import listlogs from './components/listlogs.vue'
-import createbot from './components/createbot.vue'
-import listbots from './components/listbots.vue'
-import listtrades from './components/listtrades.vue'
-import moment from 'moment-timezone'
+import Vue from 'vue';
+import listlogs from './components/listlogs.vue';
+import createbot from './components/createbot.vue';
+import listbots from './components/listbots.vue';
+import listtrades from './components/listtrades.vue';
+import moment from 'moment-timezone';
 const axios    = require('axios');
 
 var markets  = require('poloniex-api-node/lib/markets');
-markets.markets.byID["200"]={"currencyPair":"XMR_BCN"};
+if("200" in markets.markets.byID ) console.log('BTC_STORJ added to polo api.');
+else  markets.markets.byID["200"]={"currencyPair":"BTC_STORJ"};
 
-Vue.filter('formatDate', function(value) {
+Vue.filter('niceDate', function(value) {
   if (value) {
     return moment(String(value)).tz('America/Los_Angeles').format('HH:mm MM/DD/YY')
+  }
+})
+
+Vue.filter('plotlyDate', function(value) {
+  if (value) {
+    return moment(String(value)).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss')
   }
 })
 
