@@ -16,5 +16,5 @@ Live testing with node.
 4. $npm run build
 
 ## Run
-1. sudo mongodb
-2. npm run bots
+1. $sudo mongodb
+2. $npm run bots
