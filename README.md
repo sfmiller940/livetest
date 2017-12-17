@@ -17,4 +17,4 @@ Live testing with node.
 
 ## Run
 1. $sudo mongodb
-2. $npm run bots
+2. $npm run livetest
