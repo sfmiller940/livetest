@@ -1,20 +1,15 @@
 <template>
   <div id="bots" class="container-fluid">
-    <h2>bots</h2>
-    <div class="totals row">
-      <div class="col col-xs-1"><strong>Total Bots:</strong></div>
-      <div class="col col-xs-3"><strong>{{bots.length}}</strong></div>
-      <div class="col col-xs-1"><strong>Total value:</strong></div>
-      <div class="col col-xs-7">
-        <strong v-if="bots.reduce((total,bot)=>{
-            return total + ticker[bot.base+'_'+bot.quote]; },0)">
-          {{ bots.reduce(function(total,bot){
-            return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
-          },0).toFixed(8) }}
-        </strong>
-        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
-      </div>
-    </div>
+    <h2>{{bots.length}} bots:
+      <span v-if="bots.reduce((total,bot)=>{
+          return total + ticker[bot.base+'_'+bot.quote]; },0)">
+        {{ bots.reduce(function(total,bot){
+          return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
+        },0).toFixed(8) }}
+      </span>
+      <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+      total
+    </h2>
     <div class="currency_base" v-for="currbase in ['BTC','ETH','USDT','XMR']">
       <h3>{{ currbase }}</h3>
       <div class="row header">
@@ -78,18 +73,17 @@
         </div>
       </div>
       <div class="totals row">
-        <div class="col col-xs-4"><strong>{{bots.reduce((total,bot)=>{
-          return bot.base == currbase ? total+1 : total  },0)}} Bots</strong></div>
-        <div class="col col-xs-1"><strong>Total value:</strong></div>
-        <div class="col col-xs-7">
+        <div class="col col-xs-12"><strong>{{bots.reduce((total,bot)=>{
+          return bot.base == currbase ? total+1 : total  },0)}} Bots:
           <strong v-if="bots.reduce((showme,bot)=>{
               return bot.base==currbase && isNaN( ticker[bot.base+'_'+bot.quote]) ? false : showme; 
             },true)">
             {{ bots.reduce(function(total,bot){
               return bot.base==currbase ? ( total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] )) : total;
-            },0).toFixed(8) }}{{ currbase }}
+            },0).toFixed(8) }} {{ currbase }}
           </strong>
           <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+          Total
         </div>
       </div>
     </div>
@@ -184,8 +178,6 @@ export default {
               }
             };
             Plotly.newPlot(gd,traces, {
-              paper_bgcolor: 'rgba(245,246,249,0)',
-              plot_bgcolor: 'rgba(245,246,249,0)',
               showlegend: false,
               annotations: [],
               xaxis : { type:'date' },

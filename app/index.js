@@ -14,7 +14,7 @@ else  markets.markets.byID["200"]={"currencyPair":"BTC_STORJ"};
 
 Vue.filter('niceDate', function(value) {
   if (value) {
-    return moment(String(value)).tz('America/Los_Angeles').format('HH:mm MM/DD/YY')
+    return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm')
   }
 })
 

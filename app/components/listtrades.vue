@@ -6,7 +6,7 @@
       <div class="col col-xs-10">Bot</div>
     </div>
     <div class="log row" v-for="trade in trades">
-      <div class="col col-xs-2">{{trade.created_at | formatDate}}</div>
+      <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
       <div class="col col-xs-10">{{trade.bot}}</div>
     </div>
   </div>
