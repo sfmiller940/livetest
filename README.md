@@ -11,8 +11,9 @@ Live testing with node.
 1. Get files
   * Git clone repository
   * Or download and unzip
-2. $npm install
-3. $npm run build
+2. cd into directory
+3. $npm install
+4. $npm run build
 
 ## Run
 1. sudo mongodb
