@@ -27,7 +27,8 @@ var runServer = function(logs,bots,trades,wss){
     ])
 
     .get('/logs/clear', (req, res)=>{
-      logs.remove({})
+      logs
+        .remove({})
         .then(()=>{ res.json({"response":true}); })
         .catch((err)=>{ 
           console.log('Error clearing logs: '+err);
@@ -36,7 +37,8 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .get('/logs', (req, res)=>{
-      logs.find({})
+      logs
+        .find({})
         .sort('-created_at')
         .batchSize(100000)
         .exec()
@@ -45,13 +47,22 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .get('/bots/delete/:botid',(req,res)=>{
-      bots
-        .findById(req.params.botid)
+      trades
+        .find({bot:req.params.botid})
         .remove()
-        .then((message)=>{ res.json(message); })
+        .then((message)=>{
+          bots
+            .findById(req.params.botid)
+            .remove()
+            .then((message)=>{ res.json(message); })
+            .catch((err)=>{
+              console.log('Error deleting bot: '+err);
+              res.status(400).send({ message: 'Error deleting bot: '+err});
+            });
+        })
         .catch((err)=>{
-          console.log('Error deleting bot: '+err);
-          res.status(400).send({ message: 'Error deleting bot: '+err});
+          console.log('Error deleting trades: '+err);
+          res.status(400).send({ message: 'Error deleting trades: '+err});
         });
     })
 
@@ -68,15 +79,16 @@ var runServer = function(logs,bots,trades,wss){
     .post('/bots',(req,res)=>{
       Promise.all(
         req.body.quotes.map((quote)=>{
-          return bots.create({
-            exchange:req.body.exchange,
-            base:req.body.base,
-            baseAmt:req.body.baseAmt,
-            quote:quote,
-            quoteAmt:req.body.quoteAmt,
-            params:req.body.params,
-            active:req.body.active
-          });
+          return bots
+            .create({
+              exchange:req.body.exchange,
+              base:req.body.base,
+              baseAmt:req.body.baseAmt,
+              quote:quote,
+              quoteAmt:req.body.quoteAmt,
+              params:req.body.params,
+              active:req.body.active
+            });
         })
       )
       .then((newBots)=>{ res.json(newBots); })
@@ -116,7 +128,8 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .get('/trades', (req, res)=>{
-      trades.find({})
+      trades
+        .find({})
         .sort('-created_at')
         .batchsize(100000)
         .exec()
@@ -125,7 +138,8 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .get('/trades/bot/:botid', (req, res)=>{
-      trades.find({bot:req.params.botid})
+      trades
+        .find({bot:req.params.botid})
         .sort('-created_at')
         .batchSize(100000)
         .exec()
