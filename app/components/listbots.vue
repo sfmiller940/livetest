@@ -164,7 +164,7 @@ export default {
               + '&end='+ parseInt( new Date().getTime() / 1000 )
               + '&period=' + bot.params.period )
           .then((prices)=>{
-            prices = prices.data
+            prices = prices.data;
             traces[1]={
               x: prices.map(function(slice){ 
                 return self.$options.filters.plotlyDate(new Date(slice.date * 1000).toISOString()); 

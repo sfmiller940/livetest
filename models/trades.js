@@ -16,6 +16,13 @@ var tradeSchema = new Schema({
   created_at:  { type: Date, default: Date.now }
 });
 
+tradeSchema.statics.config = function(_broadcast, _bots,_logs,_signals){
+  bots = _bots;
+  broadcast = _broadcast;
+  logs = _logs;
+  signals = _signals;
+};
+
 tradeSchema.statics.log = function(trade) {
   return this
     .create(trade)
@@ -26,31 +33,6 @@ tradeSchema.statics.log = function(trade) {
     })
     .catch((err)=>{ console.log('Trade save error: '+err); });
 }
-
-tradeSchema.statics.config = function(_broadcast, _bots,_logs,_signals){
-  bots = _bots;
-  broadcast = _broadcast;
-  logs = _logs;
-  signals = _signals;
-};
-
-tradeSchema.statics.run = function(){
-  bots
-    .find({active:true})
-    .exec()
-    .then((bots)=>{
-      bots.forEach((bot)=>{
-        if(-1 != runningBots.indexOf(bot)) return;
-        runningBots.push(bot);
-        this.tradeBot(bot)
-          .then((trade)=>{
-            runningBots.splice(runningBots.indexOf(bot),1);
-          })
-          .catch((err)=>{ logs.log('Error trading bot: '+err); });
-      }); 
-    })
-    .catch((err)=>{ logs.log('Error finding bots: '+err); });
-};
 
 tradeSchema.statics.tradeBot = function (bot){
   return signals
@@ -84,6 +66,24 @@ tradeSchema.statics.tradeBot = function (bot){
         .catch((err)=>{ throw('Error saving bot: '+err) });
     })
     .catch((err)=>{ throw('Error getting ticker: '+err); });
+};
+
+tradeSchema.statics.run = function(){
+  bots
+    .find({active:true})
+    .exec()
+    .then((bots)=>{
+      bots.forEach((bot)=>{
+        if(-1 != runningBots.indexOf(bot)) return;
+        runningBots.push(bot);
+        this.tradeBot(bot)
+          .then((trade)=>{
+            runningBots.splice(runningBots.indexOf(bot),1);
+          })
+          .catch((err)=>{ logs.log('Error trading bot: '+err); });
+      }); 
+    })
+    .catch((err)=>{ logs.log('Error finding bots: '+err); });
 };
 
 module.exports = tradeSchema;
