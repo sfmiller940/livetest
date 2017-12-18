@@ -51,24 +51,30 @@
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
         <div class="col col-xs-12" v-if="bot.trades">
-          <h4>Price vs Value</h4>
-          <div class="row graph">
-            <div class="col col-xs-12" v-bind:id="'graph_'+bot._id"></div>
-          </div>
-          <h4>Recent Trades</h4>
-          <div class="row header">
-            <div class="col col-xs-1">Created</div>
-            <div class="col col-xs-2">Price</div>
-            <div class="col col-xs-2">Base Amount</div>
-            <div class="col col-xs-2">Quote Amount</div>
-            <div class="col col-xs-2">Value</div>
-          </div>
-          <div class="row bot-trade" v-for="trade in bot.trades.slice(0,10)">
-            <div class="col col-xs-1">{{trade.created_at | niceDate}}</div>
-            <div class="col col-xs-2">{{trade.price.toFixed(8)}} {{bot.base}}_{{bot.quote}}</div>
-            <div class="col col-xs-2">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
-            <div class="col col-xs-2">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
-            <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
+          <div class="row">
+            <div class="col col-xs-6">
+              <h4>Recent Trades</h4>
+              <div class="row header">
+                <div class="col col-xs-2">Created</div>
+                <div class="col col-xs-2">Value</div>
+                <div class="col col-xs-2">Price</div>
+                <div class="col col-xs-3">Base Amount</div>
+                <div class="col col-xs-3">Quote Amount</div>
+              </div>
+              <div class="row bot-trade" v-for="trade in bot.trades.slice(0,10)">
+                <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
+                <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
+                <div class="col col-xs-2">{{trade.price.toFixed(8)}}</div>
+                <div class="col col-xs-3">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
+                <div class="col col-xs-3">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
+              </div>
+            </div>
+            <div class="col col-xs-6">
+              <h4>Price vs Value</h4>
+              <div class="row graph">
+                <div class="col col-xs-12" v-bind:id="'graph_'+bot._id"></div>
+              </div>
+            </div>            
           </div>
         </div>
       </div>
