@@ -1,7 +1,19 @@
 <template>
   <div id="bots" class="container-fluid">
     <div class="currency-base" v-for="currbase in ['BTC','ETH','USDT','XMR']">
-      <h2>{{ currbase }}</h2>
+      <h2>{{ currbase }} - 
+        {{bots.reduce((total,bot)=>{
+          return bot.base == currbase ? total+1 : total  },0)}} Bots:
+        <span v-if="bots.reduce((showme,bot)=>{
+          return bot.base==currbase && isNaN( ticker[bot.base+'_'+bot.quote]) ? false : showme; 
+        },true)">
+          {{ bots.reduce(function(total,bot){
+            return bot.base==currbase ? ( total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] )) : total;
+          },0).toFixed(8) }}
+        </span>
+        <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        {{ currbase }} Total
+      </h2>
       <div class="row header">
         <div class="col col-xs-1">Trades</div>
         <div class="col col-xs-1">Created</div>
@@ -68,20 +80,6 @@
               </div>
             </div>          
           </div>
-        </div>
-      </div>
-      <div class="totals row">
-        <div class="col col-xs-12"><strong>{{bots.reduce((total,bot)=>{
-          return bot.base == currbase ? total+1 : total  },0)}} Bots:
-          <strong v-if="bots.reduce((showme,bot)=>{
-              return bot.base==currbase && isNaN( ticker[bot.base+'_'+bot.quote]) ? false : showme; 
-            },true)">
-            {{ bots.reduce(function(total,bot){
-              return bot.base==currbase ? ( total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] )) : total;
-            },0).toFixed(8) }} {{ currbase }}
-          </strong>
-          <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
-          Total
         </div>
       </div>
     </div>

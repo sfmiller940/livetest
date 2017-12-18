@@ -138,14 +138,24 @@ h2{
   }
 }
 
-h4{
+h3{
   margin: 0;
+  font-size: 1.25rem;
 }
 
 #bots{
 
+  h2{
+    font-size:1.5rem;
+  }
+
   .currency-base{
+    padding-bottom: 1rem;
     margin-bottom: 2rem;
+
+    &:last-child{
+      margin-bottom: 0;
+    }
   }
 
   .row{
