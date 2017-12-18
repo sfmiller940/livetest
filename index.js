@@ -4,16 +4,25 @@ const { logs:logs,
         trades:trades
       }          = require('./models'),
       server     = require('./server'),
-      wss        = require('./conns/localWS'),
-      configPolo = require('./conns/poloniex.js');
+      conns      = require('./conns'),
+      signals    = require('./signals');
 
-logs.config(wss.broadcast);
+logs.config(conns.wss.broadcast);
 
-server(logs,bots,trades,wss);
+server(logs,bots,trades,conns.wss);
 
-var poloniex = configPolo(logs);
-bots.config(wss.broadcast,logs,trades,poloniex);
+var poloniex = conns.configPolo(logs);
+
+signals.config(poloniex);
+bots.config(conns.wss.broadcast,logs,trades,poloniex,signals);
+trades.config(conns.wss.broadcast,bots,logs,signals);
+
 poloniex.openWebSocket({version:2});
+
 setInterval(()=>{
   bots.run(trades);
-},5000);
+},6000);
+
+setInterval(()=>{
+  trades.run(trades);
+},12000);

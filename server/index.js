@@ -10,7 +10,7 @@ var runServer = function(logs,bots,trades,wss){
     Promise.all([
       logs.find({}).sort('-created_at').batchSize(100000).exec(),
       bots.find({}).sort('-created_at').batchSize(100000).exec(),
-      trades.find({}).sort('-created_at').limit(50).exec()
+      trades.find({}).sort('-created_at').limit(20).exec()
     ])
     .then(([logs,bots,trades])=>{ ws.send(JSON.stringify({'init':{'logs':logs,'bots':bots,'trades':trades}})); })
     .catch((err)=>"Error getting models: "+err);
@@ -134,7 +134,7 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .listen(app.get('port'),()=>{
-      console.log('Node server running at http://localhost:'+app.get('port'));
+      console.log('HTTP server running at http://localhost:'+app.get('port'));
     });
 };
 
