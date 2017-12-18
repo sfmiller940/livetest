@@ -1,6 +1,7 @@
 const AUTOBAHN_DEBUG = true;
 
 import Vue from 'vue';
+import dashboard from './components/dashboard.vue';
 import listlogs from './components/listlogs.vue';
 import createbot from './components/createbot.vue';
 import listbots from './components/listbots.vue';
@@ -27,6 +28,7 @@ Vue.filter('plotlyDate', function(value) {
 var botwatch = new Vue({
   el: '#botwatch',
   components: {
+    'dashboard': dashboard,
     'listlogs': listlogs,
     'createbot': createbot,
     'listbots': listbots,
@@ -35,6 +37,8 @@ var botwatch = new Vue({
   data:{
     'logs':[],
     'bots':[],
+    'botsran':'',
+    'lasttrade':'',
     'trades':[],
     'ticker':{}
   },
@@ -72,6 +76,10 @@ var botwatch = new Vue({
         newBot['baseAmt'] = message.trade.baseAmt;
         newBot['quoteAmt'] = message.trade.quoteAmt;
         Vue.set(botwatch.bots, botInd, newBot );
+        Vue.set(botwatch, 'lasttrade', message.trade.created_at);
+      }
+      else if('botsRan' in message){
+        Vue.set(botwatch,'botsran',message.botsRan);
       }
     }
     function onPoloMessage(event){

@@ -14,13 +14,13 @@
   <body>
     <div id="page">
 
-      <header>
-        <div id="brand">
-          <h1 id="title">b<img src="img/HAL9000.svg">twatch</h1>
-        </div>
-      </header>
-
       <div id="botwatch">
+        <dashboard
+          :bots="bots"
+          :botsran="botsran"
+          :lasttrade="lasttrade"
+          :ticker="ticker"
+        ></dashboard>
         <listlogs
           :logs="logs"
         ></listlogs>

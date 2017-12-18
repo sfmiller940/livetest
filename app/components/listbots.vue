@@ -1,17 +1,7 @@
 <template>
   <div id="bots" class="container-fluid">
-    <h2>{{bots.length}} bots:
-      <span v-if="bots.reduce((total,bot)=>{
-          return total + ticker[bot.base+'_'+bot.quote]; },0)">
-        {{ bots.reduce(function(total,bot){
-          return total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] );
-        },0).toFixed(8) }}
-      </span>
-      <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
-      total
-    </h2>
-    <div class="currency_base" v-for="currbase in ['BTC','ETH','USDT','XMR']">
-      <h3>{{ currbase }}</h3>
+    <div class="currency-base" v-for="currbase in ['BTC','ETH','USDT','XMR']">
+      <h2>{{ currbase }}</h2>
       <div class="row header">
         <div class="col col-xs-1">Trades</div>
         <div class="col col-xs-1">Created</div>
@@ -50,31 +40,33 @@
         <div class="col col-xs-1">
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
-        <div class="col col-xs-12" v-if="bot.trades">
+        <div class="col col-xs-12 bot-trades" v-if="bot.trades">
           <div class="row">
-            <div class="col col-xs-6">
-              <h4>Recent Trades</h4>
-              <div class="row header">
-                <div class="col col-xs-2">Created</div>
-                <div class="col col-xs-2">Value</div>
-                <div class="col col-xs-2">Price</div>
-                <div class="col col-xs-3">Base Amount</div>
-                <div class="col col-xs-3">Quote Amount</div>
-              </div>
-              <div class="row bot-trade" v-for="trade in bot.trades.slice(0,10)">
-                <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
-                <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
-                <div class="col col-xs-2">{{trade.price.toFixed(8)}}</div>
-                <div class="col col-xs-3">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
-                <div class="col col-xs-3">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
-              </div>
-            </div>
-            <div class="col col-xs-6">
-              <h4>Price vs Value</h4>
+            <div class="col col-xs-12">
+              <h3>Price vs Value</h3>
               <div class="row graph">
                 <div class="col col-xs-12" v-bind:id="'graph_'+bot._id"></div>
               </div>
-            </div>            
+            </div>  
+            <div class="col col-xs-12">
+              <h3>Recent Trades</h3>
+              <div class="row header">
+                <div class="col col-xs-1"></div>
+                <div class="col col-xs-2">Created</div>
+                <div class="col col-xs-2">Value</div>
+                <div class="col col-xs-2">Price</div>
+                <div class="col col-xs-2">Base Amount</div>
+                <div class="col col-xs-2">Quote Amount</div>
+              </div>
+              <div class="row bot-trade" v-for="trade in bot.trades.slice(0,5)">
+                <div class="col col-xs-1"></div>
+                <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
+                <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
+                <div class="col col-xs-2">{{trade.price.toFixed(8)}}</div>
+                <div class="col col-xs-2">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
+                <div class="col col-xs-2">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
+              </div>
+            </div>          
           </div>
         </div>
       </div>
@@ -158,8 +150,9 @@ export default {
           x: bot.trades.map(function(trade){ return self.$options.filters.plotlyDate(trade.created_at); }),
           y: bot.trades.map(function(trade){ return Number(trade.baseAmt) + (Number(trade.quoteAmt)*Number(trade.price)); }),
           type: 'scatter',
+          yaxis: 'y2',
           marker: {
-            color: 'rgb(125,125,255)'
+            color: '#f33'
           }
         };
 
@@ -176,32 +169,38 @@ export default {
                 return self.$options.filters.plotlyDate(new Date(slice.date * 1000).toISOString()); 
               }),
               y: prices.map(function(slice){ return slice.weightedAverage }),
-              name: 'yaxis2 data',
-              yaxis: 'y2',
               type: 'scatter',
               marker: {
-                color: 'rgba(255, 125, 125, 1.0 )'
+                color: '#33f'
               }
             };
-            Plotly.newPlot(gd,traces, {
+            Plotly.newPlot(gd,traces.reverse(), {
               showlegend: false,
               annotations: [],
-              xaxis : { type:'date' },
+              xaxis : {
+                type:'date',
+                gridcolor:'#999', 
+                zerolinecolor: '#999'
+              },
               yaxis1: {
-                tickfont: {color: 'rgb(125, 125, 255)'},
-                title: 'Value',
+                tickfont: {color: '#33f'},
+                title: 'Price',
                 titlefont: {
-                  color: 'rgb(125,125,255)',
-                }
+                  color: '#33f',
+                },
+                gridcolor:'#99f',
+                zerolinecolor: '#99f' 
               },
               yaxis2: {
-                tickfont: {color: 'rgb(255, 125, 125)'},
+                tickfont: {color: '#f33'},
                 overlaying: 'y',
                 side: 'right',
-                title: 'Price',
+                title: 'Value',
                 titlefont:{
-                  color: 'rgb(255,125,125)',
+                  color: '#f33',
                 },
+                gridcolor:'#f99',
+                zerolinecolor: '#f99'                
               }
             });
           })
