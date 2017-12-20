@@ -35,6 +35,7 @@ tradeSchema.statics.log = function(trade) {
 }
 
 tradeSchema.statics.tradeBot = function (bot){
+  if( (bot.buy && bot.baseAmt == 0) || ( (!bot.buy) && bot.quoteAmt==0 ) ) return Promise.resolve(true);
   return signals
     .getTicker(bot.exchange,bot.pair())
     .then((ticker)=>{
@@ -47,7 +48,6 @@ tradeSchema.statics.tradeBot = function (bot){
         bot.baseAmt += bot.quoteAmt * price;
         bot.quoteAmt = 0;
       }
-      else{ return; }
       return bot
         .save()
         .then((bot) => {
@@ -83,7 +83,7 @@ tradeSchema.statics.run = function(){
           .catch((err)=>{ logs.log('Error trading bot: '+err); });
       }); 
     })
-    .catch((err)=>{ logs.log('Error finding bots: '+err); });
+    .catch((err)=>{ logs.log('Error finding trading bots: '+err); });
 };
 
 module.exports = tradeSchema;

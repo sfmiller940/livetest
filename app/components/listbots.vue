@@ -182,7 +182,7 @@ export default {
               },
               yaxis1: {
                 tickfont: {color: '#33f'},
-                title: 'Price',
+                title: bot.base+'_'+bot.quote,
                 titlefont: {
                   color: '#33f',
                 },
@@ -193,7 +193,7 @@ export default {
                 tickfont: {color: '#f33'},
                 overlaying: 'y',
                 side: 'right',
-                title: 'Value',
+                title: 'Bot Value in '+bot.base,
                 titlefont:{
                   color: '#f33',
                 },

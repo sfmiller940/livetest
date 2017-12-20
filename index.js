@@ -1,28 +1,70 @@
 "use strict"
-const { logs:logs,
-        bots:bots,
-        trades:trades
-      }          = require('./models'),
-      server     = require('./server'),
-      conns      = require('./conns'),
-      signals    = require('./signals');
+const cluster     = require('cluster'),
+      stopSignals = [
+        'SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
+        'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
+      ];
 
-logs.config(conns.wss.broadcast);
+cluster.on('disconnect', function(worker) {
+    console.log('worker %d died. restarting...', worker.process.pid);
+    cluster.fork();
+});
+cluster.on('exit', (worker, code, signal) => {
+  console.log('worker %d died (%s). restarting...', worker.process.pid, signal || code);
+  cluster.fork();
+});
 
-server(logs,bots,trades,conns.wss);
+if (cluster.isMaster) {
+  
+  console.log('Starting worker...');
+  cluster.fork();
 
-var poloniex = conns.configPolo(logs);
+  stopSignals.forEach(function (signal) {
+    process.on(signal, function () {
+      console.log(`Got ${signal}, stopping workers...`);
+      stopping = true;
+      cluster.disconnect(function () {
+        console.log('All workers stopped, exiting.');
+        process.exit(0);
+      });
+    });
+  });
+} else {
 
-signals.config(poloniex);
-bots.config(conns.wss.broadcast,logs,trades,poloniex,signals);
-trades.config(conns.wss.broadcast,bots,logs,signals);
+  const { logs:logs,
+            bots:bots,
+            trades:trades
+          }          = require('./models'),
+          server     = require('./server'),
+          conns      = require('./conns'),
+          signals    = require('./signals');
 
-poloniex.openWebSocket({version:2});
+  logs.config(conns.wss.broadcast);
+  logs.log('Worker started.');
 
-setInterval(()=>{
-  bots.run(trades);
-},6000);
+  server(logs,bots,trades,conns.wss);
 
-setInterval(()=>{
-  trades.run(trades);
-},12000);
+  var poloniex = conns.configPolo(logs);
+
+  signals.config(poloniex);
+
+  bots.config(
+    conns.wss.broadcast,
+    logs,
+    trades,
+    poloniex,
+    signals
+  );
+
+  trades.config(
+    conns.wss.broadcast,
+    bots,
+    logs,
+    signals
+  );
+
+  poloniex.openWebSocket({version:2});
+
+  setInterval(()=>{ bots.run(trades); },6000);
+  setInterval(()=>{ trades.run(trades); },12000);
+}
