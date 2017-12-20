@@ -9,10 +9,6 @@ import listtrades from './components/listtrades.vue';
 import moment from 'moment-timezone';
 const axios    = require('axios');
 
-var markets  = require('poloniex-api-node/lib/markets');
-if("200" in markets.markets.byID ) console.log('BTC_STORJ added to polo api.');
-else  markets.markets.byID["200"]={"currencyPair":"BTC_STORJ"};
-
 Vue.filter('niceDate', function(value) {
   if (value) {
     return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm')
@@ -38,6 +34,7 @@ var botwatch = new Vue({
     'logs':[],
     'bots':[],
     'botsran':'',
+    'markets':[],
     'lasttrade':'',
     'trades':[],
     'ticker':{}
@@ -84,11 +81,35 @@ var botwatch = new Vue({
     }
     function onPoloMessage(event){
       var message = JSON.parse(event.data);
-      if(message[0]!=1002) return;
-      if(!( message[2][0] in markets.markets.byID )) console.log('Missing market: ', message[2][0]);
-      Vue.set( botwatch.ticker, markets.markets.byID[message[2][0]].currencyPair , (Number(message[2][2]) + Number(message[2][3]))/2 );
+      if( message[0]!=1002 || message[1]==1) return;
+
+      var ind = botwatch.markets.findIndex(market => market.id == message[2][0]);
+      if(-1 == ind ) console.log('Missing market: ', message[2][0]);
+      Vue.set( botwatch.ticker, botwatch.markets[ind].pair, (Number(message[2][2]) + Number(message[2][3]))/2 );
     }
-    startWS('ws://localhost:8080',onLocalMessage);
-    startWS('wss://api2.poloniex.com',onPoloMessage);
+
+    axios
+      .get('https://poloniex.com/public?command=returnTicker')
+      .then(ticker=>{
+
+        ticker=ticker.data;
+        for(var pair in ticker){
+          Vue.set(botwatch.ticker,pair,(Number(ticker[pair].lowestAsk) + Number(ticker[pair].highestBid))/2);
+
+          var market = {
+            'pair':pair,
+            'id':ticker[pair].id,
+            'base':pair.split('_')[0],
+            'quote':pair.split('_')[1]
+          }
+          botwatch.markets.push(market);
+        }
+
+        startWS('ws://localhost:8080',onLocalMessage);  
+        startWS('wss://api2.poloniex.com',onPoloMessage);   
+      })
+      .catch(err=>{
+        console.log('Failed to get ticker: ',err);
+      });   
   }
 })

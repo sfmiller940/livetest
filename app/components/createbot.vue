@@ -31,31 +31,7 @@
       </div>
       <div class="col col-xs-1">
         <select v-model="quotes" multiple>
-          <option v-if="base!='XMR'">BCH</option>
-          <option v-if="base=='XMR'||base=='BTC'">BCN</option>
-          <option v-if="base=='XMR'||base=='BTC'">BLK</option>
-          <option v-if="base=='USDT'">BTC</option>
-          <option v-if="base=='XMR'||base=='BTC'">BTCD</option>
-          <option v-if="base=='ETH'||base=='BTC'">CVC</option>
-          <option v-if="base!='ETH'">DASH</option>
-          <option v-if="base!='XMR'">ETC</option>
-          <option v-if="base!='ETH'&&base!='XMR'">ETH</option>
-          <option v-if="base=='BTC'">FCT</option>
-          <option v-if="base=='ETH'||base=='BTC'">GAS</option>
-          <option v-if="base=='ETH'||base=='BTC'">GNO</option>
-          <option v-if="base=='ETH'||base=='BTC'">GNT</option>
-          <option v-if="base=='ETH'||base=='BTC'">LSK</option>
-          <option v-if="base!='ETH'">LTC</option>
-          <option v-if="base!='ETH' && base!='USDT'">MAID</option>
-          <option v-if="base!='ETH'">NXT</option>
-          <option v-if="base=='ETH'||base=='BTC'">OMG</option>
-          <option v-if="base!='XMR'">REP</option>
-          <option v-if="base=='ETH'||base=='BTC'">STEEM</option>
-          <option v-if="base!='ETH'&&base!='XMR'">STR</option>
-          <option v-if="base!='XMR'&&base!='ETH'">XMR</option>
-          <option v-if="base!='XMR'&&base!='ETH'">XRP</option>
-          <option>ZEC</option>
-          <option v-if="base=='ETH'||base=='BTC'">ZRX</option>
+          <option v-for="market in markets" v-if="base==market.base">{{market.quote}}</option>
         </select>
       </div>
       <div class="col col-xs-1" class="col col-xs-1">
@@ -114,7 +90,7 @@ export default {
       active: false
     }
   },
-  props:['bots'],
+  props:['bots','markets'],
   methods:{
     createBot:function(){
       var self = this;
