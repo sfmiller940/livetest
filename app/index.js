@@ -93,17 +93,22 @@ var botwatch = new Vue({
       .then(ticker=>{
 
         ticker=ticker.data;
+        var markets = [];
         for(var pair in ticker){
           Vue.set(botwatch.ticker,pair,(Number(ticker[pair].lowestAsk) + Number(ticker[pair].highestBid))/2);
 
-          var market = {
+          markets.push({
             'pair':pair,
             'id':ticker[pair].id,
             'base':pair.split('_')[0],
             'quote':pair.split('_')[1]
-          }
-          botwatch.markets.push(market);
+          });
         }
+        markets.sort(function(a,b){
+          if(a.base != b.base) return a.base < b.base ? -1 : 1;
+          return a.quote < b.quote ? -1 : 1;
+        });
+        Vue.set(botwatch, 'markets', markets);
 
         startWS('ws://localhost:8080',onLocalMessage);  
         startWS('wss://api2.poloniex.com',onPoloMessage);   

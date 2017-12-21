@@ -23,17 +23,6 @@ tradeSchema.statics.config = function(_broadcast, _bots,_logs,_signals){
   signals = _signals;
 };
 
-tradeSchema.statics.log = function(trade) {
-  return this
-    .create(trade)
-    .then((trade)=>{
-      console.log('New trade: ');
-      console.log(trade);
-      return trade;
-    })
-    .catch((err)=>{ console.log('Trade save error: '+err); });
-}
-
 tradeSchema.statics.tradeBot = function (bot){
   if( (bot.buy && bot.baseAmt == 0) || ( (!bot.buy) && bot.quoteAmt==0 ) ) return Promise.resolve(true);
   return signals
@@ -51,17 +40,18 @@ tradeSchema.statics.tradeBot = function (bot){
       return bot
         .save()
         .then((bot) => {
-          return this.log({
-            bot:bot,
-            baseAmt:bot.baseAmt,
-            quoteAmt:bot.quoteAmt,
-            price: price
-          })
-          .then((trade)=>{
-            broadcast({'trade':trade});
-            return Promise.resolve(trade);
-          })
-          .catch((err)=>{ throw('Error saving trade: '+err) });
+          return this
+            .create({
+              bot:bot,
+              baseAmt:bot.baseAmt,
+              quoteAmt:bot.quoteAmt,
+              price: price
+            })
+            .then((trade)=>{
+              broadcast({'trade':trade});
+              return Promise.resolve(trade);
+            })
+            .catch((err)=>{ throw('Error saving trade: '+err) });
         })
         .catch((err)=>{ throw('Error saving bot: '+err) });
     })

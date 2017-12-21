@@ -8,13 +8,17 @@ var poloniex,
 var config = function(_poloniex){
   poloniex=_poloniex;
   poloniex.subscribe('ticker');
-  /*poloniex
+  poloniex
     .on('message', (channel, data, seq) => {
       if (channel === 'ticker') {
         if( ! data.currencyPair ) console.log('Missing currencyPair: '+data);
         poloTicker[data.currencyPair]=data;
       }
-    });*/
+    });
+  poloniex
+    .returnTicker()
+    .then(ticker=>{ poloTicker = ticker; })
+    .catch((err)=>{throw('Error getting ticker: '+err);});
 };
 
 var vwap = function (df, len = df.length){
@@ -49,18 +53,7 @@ var getTicker = function(exchange,pair){
           'ask': poloTicker[pair].lowestAsk
         });
       }
-      else{
-        return poloniex
-          .returnTicker()
-          .then(ticker=>{
-            poloTicker = ticker;
-            return { 
-              'bid':poloTicker[pair].highestBid,
-              'ask':poloTicker[pair].lowestAsk
-            };
-          })
-          .catch(err=>{ throw('Error getting ticker: '+err); });
-      }
+      else{throw('Ticker not loaded.');}
     break;
   }
   throw('Ticker error: invalid exchange');
