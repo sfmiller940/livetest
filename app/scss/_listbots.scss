@@ -1,0 +1,95 @@
+#bots{
+
+  h2{
+    font-size:1.5rem;
+  }
+
+  .currency-base{
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+
+    &:last-child{
+      margin-bottom: 0;
+    }
+  }
+
+  .bglayer rect{
+    fill: transparent !important;
+  }
+
+  .main-svg{
+    background: none !important;
+  }
+
+  .row{
+    margin: 0;
+    padding: 0.25rem 0;
+
+    &:nth-child(2n){
+      background: #ddd;
+      border-radius: 0.5rem;
+    }
+
+    &.header,
+    &.totals{
+      padding: 0.5rem 0;
+    }
+
+    .col.col-xs-1{
+      width: 9.69%;
+      text-align: right;
+
+      &.trades,
+      &.live,
+      &.period,
+      &.tradesper,
+      &.signal,
+      &.active,
+      &.params{
+        text-align: center;
+      }
+
+      &.trades,
+      &.period,
+      &.hold,
+      &.profit,
+      &.active,
+      &.live,
+      &.signal,
+      &.delete{
+        width: 5.69%;
+      }
+
+      &.quote,
+      &.params{
+        width: 12.69%;
+      }
+
+      &.profit,
+      &.hold{
+
+        .percent{
+          color: red;
+
+          &.profit{
+            color: green;
+          }
+        }
+      }
+    }
+
+    .col.bot-trades{
+      padding: 1rem;
+
+      > .row{
+        background: #dfe;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+
+        .row:nth-child(2n){
+          background: none;
+        }
+      }
+    }
+  }
+}
