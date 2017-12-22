@@ -8,48 +8,85 @@
           return bot.base==currbase && isNaN( ticker[bot.base+'_'+bot.quote]) ? false : showme; 
         },true)">
           {{ bots.reduce(function(total,bot){
-            return bot.base==currbase ? ( total + bot.baseAmt + ( bot.quoteAmt * ticker[bot.base+'_'+bot.quote] )) : total;
+            return bot.base==currbase ? ( total + getBotValue(bot) ) : total;
           },0).toFixed(8) }}
         </span>
         <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         {{ currbase }} Total
       </h2>
       <div class="row header">
-        <div class="col col-xs-1">Trades</div>
-        <div class="col col-xs-1">Created</div>
-        <div class="col col-xs-2">Base</div>
-        <div class="col col-xs-2">Quote</div>
-        <div class="col col-xs-2">Value</div>
-        <div class="col col-xs-2">Params</div>
+        <div class="col col-xs-1 trades">Trades</div>
+        <div class="col col-xs-1 live">D:H:M</div>
+        <div class="col col-xs-1 hold">Hold</div>
+        <div class="col col-xs-1 profit">Bot</div>
+        <div class="col col-xs-1 value">Value</div>
+        <div class="col col-xs-1 base">Base</div>
+        <div class="col col-xs-1 quote">Quote</div>
+        <div class="col col-xs-1 period">Period</div>
+        <div class="col col-xs-1 signal">Signal</div>
+        <div class="col col-xs-1 params">Params</div>
+        <div class="col col-xs-1 tradesper">Trades per Hour</div>
         <div class="col col-xs-1 active">Active</div>
-        <div class="col col-xs-1"></div>
+        <div class="col col-xs-1 delete"></div>
       </div>
       <div class="bot row" v-for="(bot,ind) in bots" v-if="bot.base==currbase">
-        <div class="col col-xs-1 created">
-          <label v-bind:class="{ trades:true, clicked:bot.trades }"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
+        <div class="col col-xs-1 trades">
+          <label v-bind:class="{ trades:true, clicked:bot.trades }" v-if="0 < bot.numTrades"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
         </div>
-        <div class="col col-xs-1 created">{{bot.created_at | niceDate}}</div>
-        <div class="col col-xs-2"><transition name="fadegreen">
-          <span :key="bot.baseAmt">{{bot.baseAmt.toFixed(8)}} {{bot.base}}</span>
-        </transition></div>
-        <div class="col col-xs-2"><transition name="fadegreen">
-          <span :key="bot.quoteAmt">{{bot.quoteAmt.toFixed(8)}} {{bot.quote}}</span>
-        </transition></div>
-        <div class="col col-xs-2">
+        <div class="col col-xs-1 live">{{bot.created_at | timeSince}}</div>
+        <div class="col col-xs-1 hold">
+          <span 
+            v-if="ticker[bot.base+'_'+bot.quote] && bot.origValue" 
+            v-bind:class="{percent:true,profit:getBotHold(bot)>0}"
+          > 
+            {{getBotHold(bot).toFixed(2)}}%
+          </span>
+          <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        </div>
+        <div class="col col-xs-1 profit">
+          <span
+            v-if="ticker[bot.base+'_'+bot.quote] && bot.origValue" 
+            v-bind:class="{percent:true,profit:getBotProfit(bot)>0}"
+          >
+            {{getBotProfit(bot).toFixed(2)}}%
+          </span>
+          <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        </div>        
+        <div class="col col-xs-1 value">
           <span v-if="ticker[bot.base+'_'+bot.quote]">
-            <transition name="fadegreen">
-              <span :key="ticker[bot.base+'_'+bot.quote]">{{ ( Number(bot.baseAmt) + (Number(bot.quoteAmt) * ticker[bot.base+'_'+bot.quote])).toFixed(8)}}{{bot.base}}</span>
+            <transition name="fadeblue">
+              <span :key="ticker[bot.base+'_'+bot.quote]">
+                {{ getBotValue(bot).toFixed(8)}}
+              </span>
             </transition>
           </span>
           <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
-        <div class="col col-xs-2">{{bot.params}}</div>
+        <div class="col col-xs-1 base"><transition name="fadeblue">
+          <span :key="bot.baseAmt">{{bot.baseAmt.toFixed(8)}}</span>
+        </transition></div>
+        <div class="col col-xs-1 quote"><transition name="fadeblue">
+          <span :key="bot.quoteAmt">{{bot.quoteAmt.toFixed(8)}} {{bot.quote}}</span>
+        </transition></div>
+        <div class="col col-xs-1 period">{{bot.params.period}}</div>
+        <div class="col col-xs-1 signal">{{bot.params.signal}}</div>
+        <div class="col col-xs-1 params">{
+          <span v-if="bot.params.window1">window1: {{bot.params.window1}},</span>
+          <span v-if="bot.params.window2">window2: {{bot.params.window2}},</span>
+          <span v-if="bot.params.len">length: {{bot.params.len}}<br></span>
+        }</div>
+        <div class="col col-xs-1 tradesper">
+          <span v-if="bot.numTrades">
+            {{(bot.numTrades*1000*3600/(new Date().getTime() - new Date(bot.created_at).getTime())).toFixed(2)}}
+          </span>
+          <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        </div>
         <div class="col col-xs-1 active">
           <label v-bind:class="{ active:true, clicked:bot.active }">
             <input type="checkbox" v-model="bot.active" v-on:click="toggleActive(bot)"><i class="fa fa-check"></i>
           </label>
         </div>
-        <div class="col col-xs-1">
+        <div class="col col-xs-1 delete">
           <button class="delete" v-on:click="deleteBot(bot._id)">delete</button>
         </div>
         <div class="col col-xs-12 bot-trades" v-if="bot.trades">
@@ -61,7 +98,7 @@
               </div>
             </div>  
             <div class="col col-xs-12">
-              <h3>Recent Trades</h3>
+              <h3>Recent Trades of {{bot.numTrades}} Total</h3>
               <div class="row header">
                 <div class="col col-xs-1"></div>
                 <div class="col col-xs-2">Created</div>
@@ -97,6 +134,15 @@ export default {
   },
   props:['bots','ticker'],
   methods:{
+    getBotValue:function(bot){
+      return Number(bot.baseAmt) + (Number(bot.quoteAmt) * this.ticker[bot.base+'_'+bot.quote]);
+    },
+    getBotProfit:function(bot){
+      return (( this.getBotValue(bot) / bot.origValue) - 1)*100;
+    },
+    getBotHold:function(bot){
+      return ((this.ticker[bot.base+'_'+bot.quote]/bot.origPrice)-1)*100;
+    },
     deleteBot:function(id){
       var self=this;
       axios

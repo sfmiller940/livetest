@@ -131,7 +131,7 @@ var runServer = function(logs,bots,trades,wss){
       trades
         .find({})
         .sort('-created_at')
-        .batchsize(100000)
+        .batchSize(100000)
         .exec()
         .then((docs)=>{ res.json(docs); })
         .catch((err)=>{ console.log(err); });

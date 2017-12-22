@@ -172,6 +172,39 @@ h3{
       padding: 0.5rem 0;
     }
 
+    .col.col-xs-1{
+      width: 8.69%;
+      text-align: right;
+
+      &.trades,
+      &.live,
+      &.period,
+      &.tradesper,
+      &.hold,
+      &.profit,
+      &.signal,
+      &.active,
+      &.params{
+        text-align: center;
+      }
+
+      &.trades,
+      &.period,
+      &.hold,
+      &.profit,
+      &.active,
+      &.live,
+      &.signal{
+        width: 5.69%;
+      }
+
+      &.quote,
+      &.params{
+        width: 12.69%;
+      }
+
+    }
+
     &.bot{
 
       .col{
@@ -194,6 +227,18 @@ h3{
             }
           }
         }
+
+        &.profit,
+        &.hold{
+
+          .percent{
+            color: red;
+
+            &.profit{
+              color: green;
+            }
+          }
+        }
       }
     }
   }
@@ -207,10 +252,10 @@ h3{
   fill: transparent !important;
 }
 
-.fadegreen{
+.fadeblue{
   &-enter{
     opacity: 0;
-    color: green;
+    color: blue;
   }
   &-enter-active {
     transition: color 4s 1s ease, opacity 1s ease;

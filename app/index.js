@@ -13,13 +13,18 @@ Vue.filter('niceDate', function(value) {
   if (value) {
     return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm')
   }
-})
-
+});
 Vue.filter('plotlyDate', function(value) {
   if (value) {
     return moment(String(value)).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss')
   }
-})
+});
+Vue.filter('timeSince',function(value){
+  if(value){
+    var diff = new Date().getTime() - new Date(value).getTime();
+    return Math.floor( diff / (1000*24*3600) ) + ':' + moment.utc(moment.duration(diff).asMilliseconds()).format("HH:mm");
+  }
+});
 
 var botwatch = new Vue({
   el: '#botwatch',
@@ -59,9 +64,26 @@ var botwatch = new Vue({
     function onLocalMessage(event){
       var message = JSON.parse(event.data);
       if('init' in message){
+        var bots = message.init.bots;
         Vue.set( botwatch, 'logs', message.init.logs );
-        Vue.set( botwatch, 'bots', message.init.bots );
-        Vue.set( botwatch, 'trades', message.init.trades );
+        Vue.set( botwatch, 'bots', bots );
+        Vue.set( botwatch, 'trades', message.init.trades.slice(0,20) );
+        axios
+          .get('/trades')
+          .then(trades=>{
+            trades = trades.data;
+            bots.forEach((bot,ind)=>{
+              var botTrades = trades.filter(trade=>{ return trade.bot == bot._id });
+              bots[ind]['numTrades'] = botTrades.length;
+              if(bots[ind].numTrades!=0){
+                var firstTrade = botTrades[botTrades.length-1];
+                bots[ind]['origValue'] = firstTrade.baseAmt + (firstTrade.quoteAmt * firstTrade.price);
+                bots[ind]['origPrice'] = firstTrade.price;
+              }
+            });
+            Vue.set( botwatch, 'bots', bots );
+          })
+          .catch(err=>{ console.log('Failed to get trades: ',err); });
       }
       else if('log' in message) botwatch.logs.splice(0,0,message.log);
       else if('trade' in message){
@@ -72,6 +94,11 @@ var botwatch = new Vue({
         var newBot = botwatch.bots[botInd];
         newBot['baseAmt'] = message.trade.baseAmt;
         newBot['quoteAmt'] = message.trade.quoteAmt;
+        newBot['numTrades']++;
+        if(! ('origValue' in newBot)){
+          newBot['origValue'] = message.trade.baseAmt + (message.trade.quoteAmt * message.trade.price);
+          newBot['origPrice'] = message.trade.price;
+        }
         Vue.set(botwatch.bots, botInd, newBot );
         Vue.set(botwatch, 'lasttrade', message.trade.created_at);
       }
