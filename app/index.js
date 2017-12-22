@@ -64,10 +64,19 @@ var botwatch = new Vue({
     function onLocalMessage(event){
       var message = JSON.parse(event.data);
       if('init' in message){
-        var bots = message.init.bots;
         Vue.set( botwatch, 'logs', message.init.logs );
-        Vue.set( botwatch, 'bots', bots );
-        Vue.set( botwatch, 'trades', message.init.trades.slice(0,20) );
+
+        var bots = message.init.bots;
+
+        var trades = message.init.trades.slice(0,20);
+        trades = trades.map(trade=>{
+          var ind = bots.findIndex(bot=>{return bot._id == trade.bot;});
+          trade['base']=bots[ind].base;
+          trade['quote']=bots[ind].quote;
+          return trade;
+        });
+        Vue.set( botwatch, 'trades', trades );
+
         axios
           .get('/trades')
           .then(trades=>{
@@ -87,7 +96,11 @@ var botwatch = new Vue({
       }
       else if('log' in message) botwatch.logs.splice(0,0,message.log);
       else if('trade' in message){
-        botwatch.trades.splice(0,0,message.trade);
+        var trade = message.trade;
+        var ind = botwatch.bots.findIndex(bot=>{return bot._id==trade.bot;});
+        trade['base']=botwatch.bots[ind].base;
+        trade['quote']=botwatch.bots[ind].quote;
+        botwatch.trades.splice(0,0,trade);
         botwatch.trades.pop();
 
         var botInd = botwatch.bots.findIndex((bot)=>{ return bot._id == message.trade.bot[0]; });

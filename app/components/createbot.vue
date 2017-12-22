@@ -105,6 +105,7 @@ export default {
         })
         .then(function (response) {
           response.data.forEach((bot)=>{ 
+            bot['numTrades']=0;
             self.bots.splice(0,0,bot); 
           });
         })

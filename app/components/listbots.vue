@@ -99,21 +99,19 @@
             </div>  
             <div class="col col-xs-12">
               <h3>Recent Trades of {{bot.numTrades}} Total</h3>
-              <div class="row header">
-                <div class="col col-xs-1"></div>
-                <div class="col col-xs-2">Created</div>
-                <div class="col col-xs-2">Value</div>
+              <div class="row header trade">
+                <div class="col col-xs-2 created">Created</div>
                 <div class="col col-xs-2">Price</div>
-                <div class="col col-xs-2">Base Amount</div>
-                <div class="col col-xs-2">Quote Amount</div>
+                <div class="col col-xs-3">Base</div>
+                <div class="col col-xs-3">Quote</div>
+                <div class="col col-xs-3">Value</div>
               </div>
-              <div class="row bot-trade" v-for="trade in bot.trades.slice(0,5)">
-                <div class="col col-xs-1"></div>
+              <div class="row trade" v-for="trade in bot.trades.slice(0,5)">
                 <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
-                <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
                 <div class="col col-xs-2">{{trade.price.toFixed(8)}}</div>
-                <div class="col col-xs-2">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
-                <div class="col col-xs-2">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
+                <div class="col col-xs-3">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
+                <div class="col col-xs-3">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
+                <div class="col col-xs-3">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
               </div>
             </div>          
           </div>
