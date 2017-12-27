@@ -47,33 +47,37 @@ tradeSchema.statics.tradeBot = function (bot){
               quoteAmt:bot.quoteAmt,
               price: price
             })
-            .then((trade)=>{
+            .then(trade=>{
               broadcast({'trade':trade});
-              return Promise.resolve(trade);
+              return trade;
             })
-            .catch((err)=>{ throw('Error saving trade: '+err) });
+            .catch(err=>{ throw('Error saving trade: '+err) });
         })
-        .catch((err)=>{ throw('Error saving bot: '+err) });
+        .catch(err=>{ throw('Error saving bot: '+err) });
     })
-    .catch((err)=>{ throw('Error getting ticker: '+err); });
+    .catch(err=>{ throw('Error getting ticker: '+err); });
 };
 
 tradeSchema.statics.run = function(){
-  bots
+  return bots
     .find({active:true})
     .exec()
+    .catch(err=>{ logs.log('Error finding trading bots: '+err); })
     .then((bots)=>{
-      bots.forEach((bot)=>{
-        if(-1 != runningBots.indexOf(bot)) return;
-        runningBots.push(bot);
-        this.tradeBot(bot)
-          .then((trade)=>{
-            runningBots.splice(runningBots.indexOf(bot),1);
-          })
-          .catch((err)=>{ logs.log('Error trading bot: '+err); });
-      }); 
+      return Promise.all(
+        bots.map((bot)=>{
+          if(-1 != runningBots.indexOf(bot)) return;
+          runningBots.push(bot);
+          return this
+            .tradeBot(bot)
+            .then((trade)=>{
+              runningBots.splice(runningBots.indexOf(bot),1);
+            })
+            .catch(err=>{ logs.log('Error running trading bot: '+err); });
+        })
+      );
     })
-    .catch((err)=>{ logs.log('Error finding trading bots: '+err); });
+    .catch(err=>{ logs.log('Error running trading bots: '+err); });
 };
 
 module.exports = tradeSchema;

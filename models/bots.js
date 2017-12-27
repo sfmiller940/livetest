@@ -3,12 +3,11 @@ const mongoose       = require('mongoose'),
       Schema         = mongoose.Schema;
 
 var logs,
-    trades,
-    runningBots = [],
     polo = false,
     broadcast,
     signals,
-    poloniex;
+    poloniex,
+    botPause=200;
 
 var botSchema = new Schema({
   exchange:    String,
@@ -22,10 +21,9 @@ var botSchema = new Schema({
   created_at:  { type: Date, default: Date.now }
 });
 
-botSchema.statics.config = function(_broadcast,_logs,_trades,_poloniex,_signals){
+botSchema.statics.config = function(_broadcast,_logs,_poloniex,_signals){
   logs = _logs;
   poloniex = _poloniex;
-  trades = _trades;
   broadcast = _broadcast;
   signals = _signals;
   poloniex.on('open', () => { polo=true; });
@@ -43,35 +41,44 @@ botSchema.methods.pair = function(){
 botSchema.methods.run = function(){
   return signals
     .signals[this.params.signal](this)
+    .catch(err=>{throw('Error getting signal: '+err);})
     .then((signal)=>{
       if(this.buy!=signal){
         this.buy = signal;
-        this
+        return this
           .save()
-          .catch((err)=>{console.log('Failed to save signal: '+err);});
+          .catch((err)=>{throw('Failed to save signal: '+err);});
       }
-    });
+      return signal;
+    })
+    .catch(err=>{throw('Error processing signal: '+err);});
 };
 
+function delay(t) {
+   return new Promise(function(resolve) { 
+       setTimeout(resolve, t)
+   });
+}
+
 botSchema.statics.run = function(){
-  if(!polo) return;
-  this
+  if(!polo) return delay(botPause);
+  return this
     .find({active:true})
     .exec()
     .then((bots)=>{
-      bots.forEach((bot)=>{
-        if(-1 != runningBots.indexOf(bot)) return;
-        runningBots.push(bot);
-        bot
-          .run()
-          .then((trade)=>{
-            runningBots.splice(runningBots.indexOf(bot),1);
-          })
-          .catch((err)=>{ logs.log('Error running bot: '+err); });
-      }); 
+      return Promise.all(
+        bots.map((bot,ind)=>{
+          return delay(botPause*ind).then(()=>{
+            return bot
+              .run()
+              .catch((err)=>{ logs.log('Error running bot: '+err); });
+          });
+        })
+      )
+      .then(results=>{ broadcast({'botsRan': new Date().toLocaleString()}); })
+      .catch(err=>{throw('Error running bots: '+err);});
     })
     .catch((err)=>{ logs.log('Error finding bots: '+err); });
-  broadcast({'botsRan': new Date().toLocaleString()});
 };
 
 module.exports = botSchema;

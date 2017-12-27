@@ -14,6 +14,11 @@ Vue.filter('niceDate', function(value) {
     return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm')
   }
 });
+Vue.filter('niceDatess', function(value) {
+  if (value) {
+    return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm:ss')
+  }
+});
 Vue.filter('plotlyDate', function(value) {
   if (value) {
     return moment(String(value)).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss')
@@ -67,6 +72,7 @@ var botwatch = new Vue({
         Vue.set( botwatch, 'logs', message.init.logs );
 
         var bots = message.init.bots;
+        Vue.set( botwatch, 'bots', bots );
 
         var trades = message.init.trades.slice(0,20);
         trades = trades.map(trade=>{
@@ -76,23 +82,6 @@ var botwatch = new Vue({
           return trade;
         });
         Vue.set( botwatch, 'trades', trades );
-
-        axios
-          .get('/trades')
-          .then(trades=>{
-            trades = trades.data;
-            bots.forEach((bot,ind)=>{
-              var botTrades = trades.filter(trade=>{ return trade.bot == bot._id });
-              bots[ind]['numTrades'] = botTrades.length;
-              if(bots[ind].numTrades!=0){
-                var firstTrade = botTrades[botTrades.length-1];
-                bots[ind]['origValue'] = firstTrade.baseAmt + (firstTrade.quoteAmt * firstTrade.price);
-                bots[ind]['origPrice'] = firstTrade.price;
-              }
-            });
-            Vue.set( botwatch, 'bots', bots );
-          })
-          .catch(err=>{ console.log('Failed to get trades: ',err); });
       }
       else if('log' in message) botwatch.logs.splice(0,0,message.log);
       else if('trade' in message){

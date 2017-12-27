@@ -9,10 +9,39 @@ var runServer = function(logs,bots,trades,wss){
   wss.on('connection', function connection(ws) {
     Promise.all([
       logs.find({}).sort('-created_at').batchSize(100000).exec(),
-      bots.find({}).sort('-created_at').batchSize(100000).exec(),
-      trades.find({}).sort('-created_at').limit(20).exec()
+      trades.find({}).sort('-created_at').limit(20).exec(),
+      bots
+        .find({})
+        .sort('-created_at')
+        .batchSize(100000)
+        .lean()
+        .exec()
+        .then((bots)=>{
+          return Promise.all( 
+            bots.map(bot=>{
+              return trades
+                .count({bot:bot})
+                .exec()
+                .then(numTrades=>{
+                  bot['numTrades']=numTrades;
+                  if(numTrades==0) return bot;
+                  return trades
+                    .findOne({bot:bot})
+                    .sort('created_at')
+                    .lean()
+                    .exec()
+                    .then(trade=>{
+                      bot['origValue'] = trade.baseAmt + (trade.quoteAmt * trade.price);
+                      bot['origPrice'] = trade.price;
+                      return bot;
+                    });
+                });
+            }) 
+          );
+        })
+        .catch((err)=>{ console.log(err); })
     ])
-    .then(([logs,bots,trades])=>{ ws.send(JSON.stringify({'init':{'logs':logs,'bots':bots,'trades':trades}})); })
+    .then(([logs,trades,bots])=>{ ws.send(JSON.stringify({'init':{'logs':logs,'bots':bots,'trades':trades}})); })
     .catch((err)=>"Error getting models: "+err);
   });
 
@@ -71,9 +100,9 @@ var runServer = function(logs,bots,trades,wss){
         .find({})
         .sort('-created_at')
         .batchSize(100000)
+        .lean()
         .exec()
-        .then((docs)=>{ res.json(docs); })
-        .catch((err)=>{ console.log(err); });
+        .then((bots)=>{ res.json(bots); });
     })
 
     .post('/bots',(req,res)=>{
@@ -148,7 +177,7 @@ var runServer = function(logs,bots,trades,wss){
     })
 
     .listen(app.get('port'),()=>{
-      console.log('HTTP server running at http://localhost:'+app.get('port'));
+      console.log('http://localhost:'+app.get('port')+' - HTTP server running.');
     });
 };
 

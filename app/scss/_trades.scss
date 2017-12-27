@@ -13,12 +13,13 @@
   .col{
     text-align: right;
 
-    &.created{
-      text-align: center;
-    }
-
     &.col-xs-2{
-      width: 12.5%;
+      width: 21%;
+
+      &.created{
+        text-align: center;
+        width: 16%;
+      }
     }
   }
 }

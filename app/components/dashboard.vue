@@ -13,11 +13,11 @@
         Total
       </h2></div>
       <div class="col col-xs-2">Last Run: 
-        <span v-if="botsran">{{ botsran | niceDate }}</span>
+        <span v-if="botsran">{{ botsran | niceDatess }}</span>
         <i v-else class="fa fa-spinner fa-spin"></i>
       </div>
       <div class="col col-xs-2">Last Trade: 
-        <span v-if="lasttrade">{{ lasttrade | niceDate }}</span>
+        <span v-if="lasttrade">{{ lasttrade | niceDatess }}</span>
         <i v-else class="fa fa-spinner fa-spin"></i>
       </div>
       <div class="col col-xs-5">

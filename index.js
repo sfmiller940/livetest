@@ -45,25 +45,45 @@ if (cluster.isMaster) {
 
   var poloniex = conns.configPolo(logs);
 
-  signals.config(poloniex);
+  console.log('Configuring...');
+  signals
+    .config(poloniex)
+    .catch(err=>{logs.log('Error configuring signals: '+err);})
+    .then(()=>{
 
-  bots.config(
-    conns.wss.broadcast,
-    logs,
-    trades,
-    poloniex,
-    signals
-  );
+      bots.config(
+        conns.wss.broadcast,
+        logs,
+        poloniex,
+        signals
+      );
 
-  trades.config(
-    conns.wss.broadcast,
-    bots,
-    logs,
-    signals
-  );
+      trades.config(
+        conns.wss.broadcast,
+        bots,
+        logs,
+        signals
+      );
 
-  poloniex.openWebSocket({version:2});
+      console.log('Configuration complete.');
+      poloniex.openWebSocket({version:2});
 
-  setInterval(()=>{ bots.run(trades); },6000);
-  setInterval(()=>{ trades.run(trades); },12000);
+      function runBots(){
+        bots
+          .run()
+          .then(()=>{runBots();})
+          .catch(err=>{logs.log('Error running bots: '+err);});
+      }
+      runBots();
+
+      function runTrades(){
+        trades
+          .run()
+          .then(()=>{runTrades();})
+          .catch(err=>{logs.log('Error running trades: '+err);});
+      }
+      runTrades();
+
+    })
+    .catch(err=>{logs.log('Error running bots and trades: '+err);});
 }

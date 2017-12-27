@@ -15,10 +15,10 @@ var config = function(_poloniex){
         poloTicker[data.currencyPair]=data;
       }
     });
-  poloniex
+  return poloniex
     .returnTicker()
     .then(ticker=>{ poloTicker = ticker; })
-    .catch((err)=>{throw('Error getting ticker: '+err);});
+    .catch(err=>{throw('Error getting ticker: '+err);});
 };
 
 var vwap = function (df, len = df.length){
@@ -42,7 +42,7 @@ var getTicker = function(exchange,pair){
             'ask': ticker.Ask
           };
         })
-        .catch((err)=>{
+        .catch(err=>{
           throw('Bittrex ticker error: '+err);
         });
     break;
@@ -59,7 +59,7 @@ var getTicker = function(exchange,pair){
   throw('Ticker error: invalid exchange');
 };
 
-var getChart = function(bot,len,delta=10){
+var getChart = function(bot,len,delta=20){
   var pair = bot.pair(),
       period = bot.params.period,
       now = Math.floor( (new Date()).getTime() / 1000 );
@@ -76,16 +76,18 @@ var getChart = function(bot,len,delta=10){
     now - ((len+delta)*period), // Huge lag!
     now
   )
+  .catch(err=>{ throw('Failed to load '+bot.pair()+' chart: '+err); })
   .then((chart)=>{
-    if( chart.length < len) return getChart(bot,len,delta*2);
+    if( chart.length < len){
+      console.log(new Date().toLocaleString() + ' Short '+bot.pair()+' chart. Delta: '+delta);
+      return getChart(bot,len,delta*2);
+    }
 
     if(!(pair in charts)) charts[pair]={};
     charts[pair][period] = chart;
     return chart.slice(-len);
   })
-  .catch((err)=>{
-    throw('Failed to load chart: '+err);
-  });
+  .catch(err=>{ throw('Failed to return chart: '+err); });
 }
 
 var signals = {
@@ -99,14 +101,14 @@ var signals = {
         if( (! ticker) || (! chart) ) return false;
         return vwap(chart,bot.params.len) < (ticker.ask/2 + ticker.bid/2);
       })
-      .catch((err)=>{ throw('Bladerunner error: '+err); });
+      .catch(err=>{ throw('Bladerunner error: '+err); });
   },
   'macd1':function(bot){
     return getChart(bot,bot.params.window2)
       .then((chart)=>{
         return vwap(chart,bot.params.window2) < vwap(chart,bot.params.window1);
       })
-      .catch((err)=>{throw( 'Macd1 error: '+err);});
+      .catch(err=>{throw( 'Macd1 error: '+err);});
   },
   'macd2':function(bot){
     return getChart(bot,bot.params.window2 + bot.params.len)
@@ -117,7 +119,7 @@ var signals = {
         }
         return (ave/bot.params.len) < (vwap(chart,bot.params.window2) - vwap(chart,bot.params.window1));
       })
-      .catch((err)=>{throw( 'Macd2 error: '+err);});
+      .catch(err=>{throw( 'Macd2 error: '+err);});
   }
 };
 

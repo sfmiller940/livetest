@@ -31,7 +31,7 @@
       </div>
       <div class="bot row" v-for="(bot,ind) in bots" v-if="bot.base==currbase">
         <div class="col col-xs-1 trades">
-          <label v-bind:class="{ trades:true, clicked:bot.trades }" v-if="0 < bot.numTrades"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
+          <label v-bind:class="{ trades:true, clicked:bot.trades }"><input type="checkbox" v-on:click="toggleTrades(bot,ind)"><i class="fa fa-caret-up"></i></label>
         </div>
         <div class="col col-xs-1 live">{{bot.created_at | timeSince}}</div>
         <div class="col col-xs-1 hold">
@@ -76,10 +76,9 @@
           <span v-if="bot.params.len">length: {{bot.params.len}}<br></span>
         }</div>
         <div class="col col-xs-1 tradesper">
-          <span v-if="bot.numTrades">
+          <span>
             {{(bot.numTrades*1000*3600/(new Date().getTime() - new Date(bot.created_at).getTime())).toFixed(2)}}
           </span>
-          <span v-else><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
         <div class="col col-xs-1 active">
           <label v-bind:class="{ active:true, clicked:bot.active }">
@@ -101,17 +100,17 @@
               <h3>Recent Trades of {{bot.numTrades}} Total</h3>
               <div class="row header trade">
                 <div class="col col-xs-2 created">Created</div>
+                <div class="col col-xs-2">Value</div>
+                <div class="col col-xs-2">Base</div>
+                <div class="col col-xs-2">Quote</div>
                 <div class="col col-xs-2">Price</div>
-                <div class="col col-xs-3">Base</div>
-                <div class="col col-xs-3">Quote</div>
-                <div class="col col-xs-3">Value</div>
               </div>
               <div class="row trade" v-for="trade in bot.trades.slice(0,5)">
-                <div class="col col-xs-2">{{trade.created_at | niceDate}}</div>
+                <div class="col col-xs-2 created">{{trade.created_at | niceDate}}</div>
+                <div class="col col-xs-2">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
+                <div class="col col-xs-2">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
+                <div class="col col-xs-2">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
                 <div class="col col-xs-2">{{trade.price.toFixed(8)}}</div>
-                <div class="col col-xs-3">{{trade.baseAmt.toFixed(8)}} {{bot.base}}</div>
-                <div class="col col-xs-3">{{trade.quoteAmt.toFixed(8)}} {{bot.quote}}</div>
-                <div class="col col-xs-3">{{(trade.baseAmt + (trade.quoteAmt*trade.price)).toFixed(8) }} {{bot.base}}</div>
               </div>
             </div>          
           </div>
