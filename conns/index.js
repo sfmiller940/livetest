@@ -14,7 +14,6 @@ var configPolo = function(logs){
   });
   return poloniex;
 };
-module.exports = configPolo;
 
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 },(listen)=>{

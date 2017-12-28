@@ -5,7 +5,6 @@ const mongoose       = require('mongoose'),
 var bots,
     broadcast,
     logs,
-    runningBots = [],
     signals;
 
 var tradeSchema = new Schema({
@@ -24,7 +23,7 @@ tradeSchema.statics.config = function(_broadcast, _bots,_logs,_signals){
 };
 
 tradeSchema.statics.tradeBot = function (bot){
-  if( (bot.buy && bot.baseAmt == 0) || ( (!bot.buy) && bot.quoteAmt==0 ) ) return Promise.resolve(true);
+  if( (bot.buy && bot.baseAmt == 0) || ( (!bot.buy) && bot.quoteAmt==0 ) ) return Promise.resolve(false);
   return signals
     .getTicker(bot.exchange,bot.pair())
     .then((ticker)=>{
@@ -47,7 +46,7 @@ tradeSchema.statics.tradeBot = function (bot){
               quoteAmt:bot.quoteAmt,
               price: price
             })
-            .then(trade=>{
+            .then(trade=>{ 
               broadcast({'trade':trade});
               return trade;
             })
@@ -66,16 +65,14 @@ tradeSchema.statics.run = function(){
     .then((bots)=>{
       return Promise.all(
         bots.map((bot)=>{
-          if(-1 != runningBots.indexOf(bot)) return;
-          runningBots.push(bot);
           return this
             .tradeBot(bot)
-            .then((trade)=>{
-              runningBots.splice(runningBots.indexOf(bot),1);
-            })
             .catch(err=>{ logs.log('Error running trading bot: '+err); });
         })
-      );
+      )
+      .then(trades=>{
+        //broadcast({'trades':trades.filter(trade=>{return trade;})});
+      });
     })
     .catch(err=>{ logs.log('Error running trading bots: '+err); });
 };
