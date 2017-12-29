@@ -11,12 +11,12 @@ const axios    = require('axios');
 
 Vue.filter('niceDate', function(value) {
   if (value) {
-    return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm')
+    return moment(String(value)).tz('America/Los_Angeles').format('HH:mm MM/DD/YY')
   }
 });
 Vue.filter('niceDatess', function(value) {
   if (value) {
-    return moment(String(value)).tz('America/Los_Angeles').format('MM/DD/YY HH:mm:ss')
+    return moment(String(value)).tz('America/Los_Angeles').format('HH:mm:ss MM/DD/YY')
   }
 });
 Vue.filter('plotlyDate', function(value) {
@@ -90,7 +90,7 @@ var botwatch = new Vue({
         trade['base']=botwatch.bots[ind].base;
         trade['quote']=botwatch.bots[ind].quote;
         botwatch.trades.splice(0,0,trade);
-        botwatch.trades.pop();
+        botwatch.trades.splice(20);
 
         var botInd = botwatch.bots.findIndex((bot)=>{ return bot._id == message.trade.bot[0]; });
         var newBot = botwatch.bots[botInd];
