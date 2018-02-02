@@ -29,11 +29,11 @@ tradeSchema.statics.tradeBot = function (bot){
     .then((ticker)=>{
       var price = ticker.bid/2 + ticker.ask/2;
       if( bot.buy && bot.baseAmt != 0 ){
-        bot.quoteAmt += bot.baseAmt / price;
+        bot.quoteAmt += 0.9985 * bot.baseAmt / price;
         bot.baseAmt = 0;
       }
       else if( (!bot.buy) && bot.quoteAmt != 0 ){
-        bot.baseAmt += bot.quoteAmt * price;
+        bot.baseAmt += 0.9985 * bot.quoteAmt * price;
         bot.quoteAmt = 0;
       }
       return bot
