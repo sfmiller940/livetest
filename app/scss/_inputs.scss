@@ -1,0 +1,92 @@
+button,
+input[type="text"],
+input[type="number"],
+input[type="checkbox"],
+select{
+  display: inline-block;
+  position: relative;
+  padding: 0.5rem;
+  background: #dfe;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+select[multiple]{
+  height: 180px;
+}
+button:hover,
+input:focus,
+input:active,
+select:active,
+select:focus{
+  border-color: #333;
+  outline: none;
+}
+button.clear,
+button.delete{
+  background: #fde;
+}
+form{
+  margin: 0;
+  padding: 0;
+}
+.row{
+  input,
+  select,
+  textarea,
+  button{
+    width: 100%;
+  }  
+}
+label.active,
+label.trades{
+  display: inline-block;
+  background: #fde;
+  border: 1px solid #333;
+  height: 1.5rem;
+  width: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.4s;
+
+  &.clicked{
+    background: #dfe;
+  }
+
+  input{
+    display: none;
+  }
+}
+
+label.active{
+  background: #fde;
+  
+  &.clicked{
+    background: #dfe;
+  }
+
+  i.fa{
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  input:checked + i.fa{
+    opacity:1;
+  }
+}
+
+label.trades{
+  background: #dfe;
+
+  &.clicked{
+    background: #fde;
+  }
+
+  i.fa{
+    transition: transform 0.4s;
+  }
+
+  input:checked + i.fa{
+    transform: rotate(180deg);
+  }
+}

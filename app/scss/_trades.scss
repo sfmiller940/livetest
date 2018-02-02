@@ -1,0 +1,25 @@
+#bots .row.trade,
+.row.trade{
+  max-width: 800px;
+  padding: 0.5rem;
+  display: block;
+  margin: 0 auto;
+
+  &:nth-child(2n){
+    background: #ddd;
+    border-radius: 0.5rem;
+  }
+
+  .col{
+    text-align: right;
+
+    &.col-xs-2{
+      width: 21%;
+
+      &.created{
+        text-align: center;
+        width: 16%;
+      }
+    }
+  }
+}
