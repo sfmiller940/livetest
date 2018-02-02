@@ -19,6 +19,7 @@ var runServer = function(logs,bots,trades,wss){
         .then((bots)=>{
           return Promise.all( 
             bots.map(bot=>{
+              bot['pair']=bot.pair();
               return trades
                 .count({bot:bot})
                 .exec()
