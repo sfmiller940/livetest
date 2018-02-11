@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Botwatch</title>
+    <link rel="shortcut icon" type="image/png" href="/img/favicon.png"/>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap-grid-only@1.0.0/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="page">
+
+      <div id="botwatch">
+        <dashboard
+          :bots="bots"
+          :botsran="botsran"
+          :lasttrade="lasttrade"
+          :ticker="ticker"
+        ></dashboard>
+        <listlogs
+          :logs="logs"
+        ></listlogs>
+        <createbot
+          :bots="bots"
+          :markets="markets"
+        ></createbot>
+        <listbots 
+          :bots="bots"
+          :ticker="ticker"
+        ></listbots>
+        <listtrades :trades="trades"></listlogs>
+      </div>
+    
+    </div>
+  </body>
+</html>
